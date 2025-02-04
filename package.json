@@ -37,6 +37,10 @@
     "n8nNodesApiVersion": 1,
     "nodes": [
       "dist/nodes/HttpForwardAuth/HttpForwardAuth.node.js"
+    ],
+    "credentials": [
+      "dist/credentials/Redis.credentials.js",
+      "dist/credentials/TemporaryUserApi.credentials.js"
     ]
   },
   "devDependencies": {

@@ -17,6 +17,7 @@ export class HttpForwardAuth implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'HTTP Forward Auth',
 		name: 'httpForwardAuth',
+		icon: 'file:httpForwardAuth.svg',
 		group: ['transform'],
 		version: 1,
 		description: 'It can be used as a HTTP forward auth middleware',
@@ -30,6 +31,10 @@ export class HttpForwardAuth implements INodeType {
 				name: 'redisApi',
 				required: true,
 				testedBy: 'redisConnectionTest',
+			},
+			{
+				name: 'temporaryUserApi',
+				required: false
 			},
 		],
 		properties: [],

@@ -6,9 +6,9 @@ This is an n8n community node. It can be used as a HTTP forward auth middleware 
 
 [Installation](#installation)  
 [Operations](#operations)  
-[Credentials](#credentials) 
+[Credentials](#credentials)  
 [Compatibility](#compatibility)  
-[Usage](#usage) 
+[Usage](#usage)  
 [Resources](#resources)
 
 ## Installation
