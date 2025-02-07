@@ -1,6 +1,7 @@
-import { NodeConnectionType, Node } from 'n8n-workflow';
-import type { IWebhookFunctions, IWebhookResponseData, INodeTypeDescription } from 'n8n-workflow';
+import { Node } from 'n8n-workflow';
+import type { IWebhookFunctions, IWebhookResponseData, INodeExecutionData } from 'n8n-workflow';
 
+import { triggerDescription } from './descriptions';
 import {
 	//setupRedisClient,
 	redisConnectionTest,
@@ -9,105 +10,7 @@ import {
 } from './utils';
 
 export class HttpForwardAuthTrigger extends Node {
-	description: INodeTypeDescription = {
-		displayName: 'HTTP Forward Auth Trigger',
-		name: 'httpForwardAuthTrigger',
-		icon: { light: 'file:httpForwardAuth.svg', dark: 'file:httpForwardAuth.dark.svg' },
-		group: ['trigger'],
-		version: 1,
-		description: 'It can be used as a HTTP forward authentication middleware',
-		defaults: {
-			name: 'HTTP Forward Auth Trigger',
-		},
-		codex: {
-			categories: ['Development'],
-			resources: {
-				primaryDocumentation: [
-					{
-						url: 'https://github.com/pedrozadotdev/n8n-nodes-http-forward-auth',
-					},
-				],
-			},
-		},
-		inputs: [],
-		// eslint-disable-next-line n8n-nodes-base/node-class-description-outputs-wrong
-		outputs: [
-			{
-				displayName: 'LOGIN',
-				type: NodeConnectionType.Main,
-			},
-		],
-		credentials: [
-			{
-				// eslint-disable-next-line n8n-nodes-base/node-class-description-credentials-name-unsuffixed
-				name: 'redis',
-				displayName: 'Redis Credential',
-				required: true,
-				testedBy: 'redisConnectionTest',
-			},
-		],
-		webhooks: [
-			{
-				name: 'setup',
-				httpMethod: 'GET',
-				responseMode: 'onReceived',
-				path: 'login',
-			},
-			{
-				// @ts-ignore
-				name: 'logout',
-				httpMethod: 'GET',
-				responseMode: 'onReceived',
-				path: 'logout',
-			},
-			{
-				// @ts-ignore
-				name: 'check',
-				httpMethod: 'GET',
-				responseMode: 'onReceived',
-				path: 'check',
-			},
-			{
-				name: 'default',
-				httpMethod: 'POST',
-				responseMode: 'responseNode',
-				path: 'login',
-				ndvHideUrl: true,
-			},
-		],
-		eventTriggerDescription: 'Waiting for you to login',
-		activationMessage: 'You can now use it as an authentication middleware.',
-		properties: [
-			{
-				displayName: 'Custom Login Page Header',
-				name: 'customHeader',
-				type: 'string',
-				typeOptions: {
-					editor: 'htmlEditor',
-				},
-				default: `<style>
-  /* Add some custom CSS */
-</style>`,
-				placeholder: 'Custom HTML to add to Login Page Header',
-				description: 'This will be append to the header of the Login Page',
-			},
-			{
-				displayName: 'Logout Redirect URL',
-				name: 'logoutURL',
-				type: 'string',
-				default: '',
-				placeholder: 'https://example.com/logout',
-				description: 'This is where the user will be sent when logout',
-			},
-			{
-				displayName: 'Enable HTTP',
-				name: 'secureCookie',
-				type: 'boolean',
-				default: false,
-				description: 'Whether allow HTTP (Ex.: http://localhost)',
-			},
-		],
-	};
+	description = triggerDescription;
 
 	methods = {
 		credentialTest: { redisConnectionTest },
@@ -117,9 +20,31 @@ export class HttpForwardAuthTrigger extends Node {
 		const req = ctx.getRequestObject();
 		const res = ctx.getResponseObject();
 
-		res.status(200).send(req.url).end();
+		const webhookName = ctx.getWebhookName();
+
+		const mode = ctx.getMode() === 'manual' ? 'test' : 'production';
+		const webhookUrlRaw = ctx.getNodeWebhookUrl('default') as string;
+		const webhookUrl =
+			mode === 'test' ? webhookUrlRaw.replace('/webhook', '/webhook-test') : webhookUrlRaw;
+		let pageContent = req.url;
+		let workflowData: INodeExecutionData[][] | undefined;
+
+		if (webhookName === 'setup') {
+			const loginTemplate = ctx.getNodeParameter('loginTemplate', '') as string;
+			pageContent = loginTemplate
+				.replaceAll('#ACTION#', webhookUrl)
+				.replaceAll('#ERROR_MESSAGE#', '');
+		}
+
+		if (webhookName === 'default') {
+			pageContent = JSON.stringify(req.body);
+			workflowData = [[]];
+		}
+
+		res.status(200).send(pageContent).end();
 		return {
 			noWebhookResponse: true,
+			workflowData,
 		};
 	}
 }
