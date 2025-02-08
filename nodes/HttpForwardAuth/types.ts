@@ -1,7 +1,5 @@
 import type { createClient } from 'redis';
 
-export type RedisClient = ReturnType<typeof createClient>;
-
 export type RedisCredential = {
 	host: string;
 	port: number;
@@ -9,4 +7,15 @@ export type RedisCredential = {
 	database: number;
 	user?: string;
 	password?: string;
+};
+
+export type Session = {
+	id: string;
+	user: string;
+	expiresAt: Date;
+};
+
+export type Redis = {
+	client: ReturnType<typeof createClient>;
+	RATE_LIMIT_SHA: string;
 };

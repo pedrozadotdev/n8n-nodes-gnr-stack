@@ -1,26 +1,33 @@
 import type {
 	ICredentialTestFunctions,
 	ICredentialsDecrypted,
-	IDataObject,
-	IExecuteFunctions,
 	INodeCredentialTestResult,
+	IWebhookFunctions,
 } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import crypto from 'node:crypto';
 import { createClient } from 'redis';
 
-import type { RedisCredential, RedisClient } from './types';
+import { RATE_LIMIT_STORAGE_KEY, SESSION_KEY } from './constants';
+import { sha256, encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from './oslojs';
+import { redisRLScript } from './templates';
+import type { RedisCredential, Redis, Session } from './types';
 
-export function setupRedisClient(credentials: RedisCredential): RedisClient {
-	return createClient({
+export async function setupRedisClient(credentials: RedisCredential): Promise<Redis> {
+	const client = createClient({
 		socket: {
 			host: credentials.host,
 			port: credentials.port,
 			tls: credentials.ssl === true,
 		},
 		database: credentials.database,
-		username: credentials.user || undefined,
-		password: credentials.password || undefined,
+		username: credentials.user ?? undefined,
+		password: credentials.password ?? undefined,
 	});
+
+	await client.connect();
+	const RATE_LIMIT_SHA = await client.scriptLoad(redisRLScript);
+
+	return { client, RATE_LIMIT_SHA };
 }
 
 export async function redisConnectionTest(
@@ -30,8 +37,7 @@ export async function redisConnectionTest(
 	const credentials = credential.data as RedisCredential;
 
 	try {
-		const client = setupRedisClient(credentials);
-		await client.connect();
+		const { client } = await setupRedisClient(credentials);
 		await client.ping();
 		return {
 			status: 'OK',
@@ -40,87 +46,124 @@ export async function redisConnectionTest(
 	} catch (error) {
 		return {
 			status: 'Error',
-			message: error.message,
+			message: (error as { message: string }).message,
 		};
 	}
 }
 
-export async function getValue(client: RedisClient, keyName: string, type?: string) {
-	if (type === undefined || type === 'automatic') {
-		// Request the type first
-		type = await client.type(keyName);
-	}
-
-	if (type === 'string') {
-		return await client.get(keyName);
-	} else if (type === 'hash') {
-		return await client.hGetAll(keyName);
-	} else if (type === 'list') {
-		return await client.lRange(keyName, 0, -1);
-	} else if (type === 'sets') {
-		return await client.sMembers(keyName);
-	}
+export async function generateSessionToken(): Promise<string> {
+	const bytes = new Uint8Array(20);
+	crypto.getRandomValues(bytes);
+	const token = encodeBase32LowerCaseNoPadding(bytes);
+	return token;
 }
 
-export async function setValue(
-	this: IExecuteFunctions,
-	client: RedisClient,
-	keyName: string,
-	value: string | number | object | string[] | number[],
-	expire: boolean,
-	ttl: number,
-	type?: string,
-	valueIsJSON?: boolean,
-) {
-	if (type === undefined || type === 'automatic') {
-		// Request the type first
-		if (typeof value === 'string') {
-			type = 'string';
-		} else if (Array.isArray(value)) {
-			type = 'list';
-		} else if (typeof value === 'object') {
-			type = 'hash';
-		} else {
-			throw new NodeOperationError(
-				this.getNode(),
-				'Could not identify the type to set. Please set it manually!',
-			);
-		}
-	}
+export async function createSession(
+	{ client }: Redis,
+	token: string,
+	user: string,
+): Promise<Session> {
+	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+	const session: Session = {
+		id: sessionId,
+		user,
+		// 07 days
+		expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+	};
+	await client.set(
+		`session:${session.id}`,
+		JSON.stringify({
+			id: session.id,
+			user: session.user,
+			expires_at: Math.floor(session.expiresAt.getTime() / 1000),
+		}),
+		{
+			EXAT: Math.floor(session.expiresAt.getTime() / 1000),
+		},
+	);
+	return session;
+}
 
-	if (type === 'string') {
-		await client.set(keyName, value.toString());
-	} else if (type === 'hash') {
-		if (valueIsJSON) {
-			let values: unknown;
-			if (typeof value === 'string') {
-				try {
-					values = JSON.parse(value);
-				} catch {
-					// This is how we originally worked and prevents a breaking change
-					values = value;
-				}
-			} else {
-				values = value;
-			}
-			for (const key of Object.keys(values as object)) {
-				await client.hSet(keyName, key, (values as IDataObject)[key]!.toString());
-			}
-		} else {
-			const values = value.toString().split(' ');
-			await client.hSet(keyName, values);
-		}
-	} else if (type === 'list') {
-		for (let index = 0; index < (value as string[]).length; index++) {
-			await client.lSet(keyName, index, (value as IDataObject)[index]!.toString());
-		}
-	} else if (type === 'sets') {
-		//@ts-ignore
-		await client.sAdd(keyName, value);
+export async function validateSessionToken(
+	{ client }: Redis,
+	token: string,
+): Promise<Session | null> {
+	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+	const item = await client.get(`session:${sessionId}`);
+	if (item === null) {
+		return null;
 	}
+	// eslint-disable-next-line n8n-local-rules/no-uncaught-json-parse
+	const result = JSON.parse(item) as { id: string; user: string; expires_at: number };
+	const session: Session = {
+		id: result.id,
+		user: result.user,
+		expiresAt: new Date(result.expires_at * 1000),
+	};
+	if (Date.now() >= session.expiresAt.getTime()) {
+		await client.del(`session:${sessionId}`);
+		return null;
+	}
+	if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 3.5) {
+		session.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+		await client.set(
+			`session:${session.id}`,
+			JSON.stringify({
+				id: session.id,
+				user: session.user,
+				expires_at: Math.floor(session.expiresAt.getTime() / 1000),
+			}),
+			{
+				EXAT: Math.floor(session.expiresAt.getTime() / 1000),
+			},
+		);
+	}
+	return session;
+}
 
-	if (expire) {
-		await client.expire(keyName, ttl);
-	}
-	return;
+export async function invalidateSession({ client }: Redis, sessionId: string): Promise<void> {
+	await client.del(`session:${sessionId}`);
+}
+
+export function setSessionTokenCookie(
+	res: ReturnType<IWebhookFunctions['getResponseObject']>,
+	token: string,
+	expiresAt: Date,
+	enableHTTP?: boolean,
+): void {
+	res.cookie(SESSION_KEY, token, {
+		httpOnly: true,
+		sameSite: 'lax',
+		path: '/',
+		expires: expiresAt,
+		secure: !enableHTTP,
+	});
+}
+
+export function deleteSessionTokenCookie(
+	res: ReturnType<IWebhookFunctions['getResponseObject']>,
+	enableHTTP?: boolean,
+): void {
+	res.cookie(SESSION_KEY, '', {
+		httpOnly: true,
+		sameSite: 'lax',
+		maxAge: 0,
+		path: '/',
+		secure: !enableHTTP,
+	});
+}
+
+export async function rateLimitConsume(
+	{ client, RATE_LIMIT_SHA }: Redis,
+	key: string,
+): Promise<boolean> {
+	const result = (await client.evalSha(RATE_LIMIT_SHA, {
+		keys: [`${RATE_LIMIT_STORAGE_KEY}:${key}`],
+		arguments: [Math.floor(Date.now() / 1000).toString()],
+	})) as [number];
+	return Boolean(result[0]);
+}
+
+export async function rateLimitReset({ client }: Redis, key: string): Promise<void> {
+	await client.del(`${RATE_LIMIT_STORAGE_KEY}:${key}`);
 }

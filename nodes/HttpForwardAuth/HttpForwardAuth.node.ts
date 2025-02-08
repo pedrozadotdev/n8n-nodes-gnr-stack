@@ -1,12 +1,7 @@
 import type { IExecuteFunctions, INodeExecutionData, INodeType } from 'n8n-workflow';
 
 import { responseDescription } from './descriptions';
-import {
-	//setupRedisClient,
-	redisConnectionTest,
-	//getValue,
-	//setValue,
-} from './utils';
+import { redisConnectionTest } from './utils';
 
 export class HttpForwardAuth implements INodeType {
 	description = responseDescription;

@@ -1,36 +1,35 @@
-import { Node } from 'n8n-workflow';
-import type { IWebhookFunctions, IWebhookResponseData, INodeExecutionData } from 'n8n-workflow';
+import type {
+	IWebhookFunctions,
+	IWebhookResponseData,
+	INodeExecutionData,
+	INodeType,
+} from 'n8n-workflow';
 
 import { triggerDescription } from './descriptions';
-import {
-	//setupRedisClient,
-	redisConnectionTest,
-	//getValue,
-	//setValue,
-} from './utils';
+import { redisConnectionTest } from './utils';
 
-export class HttpForwardAuthTrigger extends Node {
+export class HttpForwardAuthTrigger implements INodeType {
 	description = triggerDescription;
 
 	methods = {
 		credentialTest: { redisConnectionTest },
 	};
 
-	async webhook(ctx: IWebhookFunctions): Promise<IWebhookResponseData> {
-		const req = ctx.getRequestObject();
-		const res = ctx.getResponseObject();
+	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
+		const req = this.getRequestObject();
+		const res = this.getResponseObject();
 
-		const webhookName = ctx.getWebhookName();
+		const webhookName = this.getWebhookName();
 
-		const mode = ctx.getMode() === 'manual' ? 'test' : 'production';
-		const webhookUrlRaw = ctx.getNodeWebhookUrl('default') as string;
+		const mode = this.getMode() === 'manual' ? 'test' : 'production';
+		const webhookUrlRaw = this.getNodeWebhookUrl('default') as string;
 		const webhookUrl =
 			mode === 'test' ? webhookUrlRaw.replace('/webhook', '/webhook-test') : webhookUrlRaw;
 		let pageContent = req.url;
 		let workflowData: INodeExecutionData[][] | undefined;
 
 		if (webhookName === 'setup') {
-			const loginTemplate = ctx.getNodeParameter('loginTemplate', '') as string;
+			const loginTemplate = this.getNodeParameter('loginTemplate', '') as string;
 			pageContent = loginTemplate
 				.replaceAll('#ACTION#', webhookUrl)
 				.replaceAll('#ERROR_MESSAGE#', '');

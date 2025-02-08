@@ -2,7 +2,7 @@
 import type { INodeTypeDescription } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 
-import { defaultTemplate } from './templates';
+import { loginPageHTMLTemplate } from './templates';
 
 export const responseDescription: INodeTypeDescription = {
 	displayName: 'HTTP Forward Auth',
@@ -156,7 +156,7 @@ export const triggerDescription: INodeTypeDescription = {
 			typeOptions: {
 				editor: 'htmlEditor',
 			},
-			default: defaultTemplate,
+			default: loginPageHTMLTemplate,
 		},
 		{
 			displayName: 'Logout Redirect URL',
@@ -169,7 +169,7 @@ export const triggerDescription: INodeTypeDescription = {
 		},
 		{
 			displayName: 'Enable HTTP',
-			name: 'secureCookie',
+			name: 'enableHTTP',
 			type: 'boolean',
 			default: false,
 			description: 'Whether allow HTTP (Ex.: http://localhost)',
@@ -188,21 +188,6 @@ export const triggerDescription: INodeTypeDescription = {
 			placeholder: 'Ex: X-Real-IP',
 			description: 'Restrict login attempts by this header',
 			required: true,
-			displayOptions: {
-				show: {
-					rateLimit: [true],
-				},
-			},
-		},
-		{
-			displayName: 'Time to Wait List',
-			name: 'timeoutList',
-			type: 'json',
-			default: '[1, 2, 4, 8, 16, 30, 60, 180, 300]',
-			required: true,
-			placeholder: 'Ex: [1, 2, 3...]',
-			description: 'Seconds to wait for each subsequent failed login attempt',
-			validateType: 'array',
 			displayOptions: {
 				show: {
 					rateLimit: [true],
