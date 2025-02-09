@@ -1,5 +1,6 @@
-import type { RedisCredential, Redis } from './types';
 import { createHash } from 'node:crypto';
+
+import type { RedisCredential, Redis } from './types';
 import { setupRedisClient } from './utils';
 
 let instance: ConnectionPoolManager;
@@ -128,9 +129,9 @@ class ConnectionPoolManager {
 export async function getRedisClient(credentials: RedisCredential): Promise<Redis> {
 	const poolManager = ConnectionPoolManager.getInstance();
 
-	return poolManager.getConnection({
+	return await poolManager.getConnection({
 		credentials,
-		fallBackHandler: async () => setupRedisClient(credentials),
+		fallBackHandler: async () => await setupRedisClient(credentials),
 		cleanUpHandler: async ({ client }) => {
 			await client.disconnect();
 		},

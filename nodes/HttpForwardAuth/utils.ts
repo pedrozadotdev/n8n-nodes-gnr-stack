@@ -2,7 +2,6 @@ import type {
 	ICredentialTestFunctions,
 	ICredentialsDecrypted,
 	INodeCredentialTestResult,
-	IWebhookFunctions,
 } from 'n8n-workflow';
 import crypto from 'node:crypto';
 import { createClient } from 'redis';
@@ -39,6 +38,7 @@ export async function redisConnectionTest(
 	try {
 		const { client } = await setupRedisClient(credentials);
 		await client.ping();
+		await client.disconnect();
 		return {
 			status: 'OK',
 			message: 'Connection successful!',
@@ -71,7 +71,7 @@ export async function createSession(
 		expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
 	};
 	await client.set(
-		`session:${session.id}`,
+		`${SESSION_KEY}:${session.id}`,
 		JSON.stringify({
 			id: session.id,
 			user: session.user,
@@ -89,7 +89,7 @@ export async function validateSessionToken(
 	token: string,
 ): Promise<Session | null> {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	const item = await client.get(`session:${sessionId}`);
+	const item = await client.get(`${SESSION_KEY}:${sessionId}`);
 	if (item === null) {
 		return null;
 	}
@@ -101,13 +101,13 @@ export async function validateSessionToken(
 		expiresAt: new Date(result.expires_at * 1000),
 	};
 	if (Date.now() >= session.expiresAt.getTime()) {
-		await client.del(`session:${sessionId}`);
+		await client.del(`${SESSION_KEY}:${sessionId}`);
 		return null;
 	}
 	if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 3.5) {
 		session.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
 		await client.set(
-			`session:${session.id}`,
+			`${SESSION_KEY}:${session.id}`,
 			JSON.stringify({
 				id: session.id,
 				user: session.user,
@@ -122,35 +122,29 @@ export async function validateSessionToken(
 }
 
 export async function invalidateSession({ client }: Redis, sessionId: string): Promise<void> {
-	await client.del(`session:${sessionId}`);
+	await client.del(`${SESSION_KEY}:${sessionId}`);
 }
 
 export function setSessionTokenCookie(
-	res: ReturnType<IWebhookFunctions['getResponseObject']>,
+	addResHeader: (key: string, value: string) => void,
 	token: string,
 	expiresAt: Date,
 	enableHTTP?: boolean,
 ): void {
-	res.cookie(SESSION_KEY, token, {
-		httpOnly: true,
-		sameSite: 'lax',
-		path: '/',
-		expires: expiresAt,
-		secure: !enableHTTP,
-	});
+	addResHeader(
+		'Set-Cookie',
+		`${SESSION_KEY}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/${enableHTTP ? '' : '; Secure;'}`,
+	);
 }
 
 export function deleteSessionTokenCookie(
-	res: ReturnType<IWebhookFunctions['getResponseObject']>,
+	addResHeader: (key: string, value: string) => void,
 	enableHTTP?: boolean,
 ): void {
-	res.cookie(SESSION_KEY, '', {
-		httpOnly: true,
-		sameSite: 'lax',
-		maxAge: 0,
-		path: '/',
-		secure: !enableHTTP,
-	});
+	addResHeader(
+		'Set-Cookie',
+		`${SESSION_KEY}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/${enableHTTP ? '' : '; Secure;'}`,
+	);
 }
 
 export async function rateLimitConsume(

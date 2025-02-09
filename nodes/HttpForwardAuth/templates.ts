@@ -104,7 +104,7 @@ export const loginPageHTMLTemplate = `<!DOCTYPE html>
 				</svg>
       </div>
 
-      <form id="login-form" method="post" action="#ACTION#">
+      <form id="login-form" method="post">
         <div class="input-group">
           <label for="user">User:</label>
           <input

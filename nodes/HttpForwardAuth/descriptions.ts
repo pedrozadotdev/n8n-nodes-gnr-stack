@@ -2,6 +2,7 @@
 import type { INodeTypeDescription } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 
+import { TRIGGER_NAME } from './constants';
 import { loginPageHTMLTemplate } from './templates';
 
 export const responseDescription: INodeTypeDescription = {
@@ -47,16 +48,8 @@ export const responseDescription: INodeTypeDescription = {
 			description: 'If empty, it will be considered as a failed login attempt',
 		},
 		{
-			displayName: 'Forward Auth Header',
-			name: 'authHeader',
-			type: 'string',
-			default: 'X-Forwarded-User',
-			required: true,
-			placeholder: 'Ex: X-Forwarded-User',
-		},
-		{
-			displayName: 'Validate Error Message',
-			name: 'validateErrorMessage',
+			displayName: 'Validation Error Message',
+			name: 'validationErrorMessage',
 			type: 'string',
 			default: 'Incorrect user or password!',
 			required: true,
@@ -81,7 +74,7 @@ export const responseDescription: INodeTypeDescription = {
 
 export const triggerDescription: INodeTypeDescription = {
 	displayName: 'HTTP Forward Auth Trigger',
-	name: 'httpForwardAuthTrigger',
+	name: TRIGGER_NAME,
 	icon: { light: 'file:httpForwardAuth.svg', dark: 'file:httpForwardAuth.dark.svg' },
 	group: ['trigger'],
 	version: 1,
@@ -149,14 +142,30 @@ export const triggerDescription: INodeTypeDescription = {
 	activationMessage: 'You can now use it as an authentication middleware.',
 	properties: [
 		{
-			displayName: 'Login Page Template',
-			name: 'loginTemplate',
+			displayName: 'Forward Auth Header',
+			name: 'authHeader',
+			type: 'string',
+			default: 'X-Forwarded-User',
+			required: true,
+			placeholder: 'Ex: X-Forwarded-User',
+		},
+		{
+			displayName: 'Login Redirect URL',
+			name: 'loginURL',
 			type: 'string',
 			required: true,
-			typeOptions: {
-				editor: 'htmlEditor',
-			},
-			default: loginPageHTMLTemplate,
+			default: '',
+			placeholder: 'https://example.com/login',
+			description: 'This is where the user will be sent when not logged in',
+		},
+		{
+			displayName: 'After Login Redirect URL',
+			name: 'afterLoginURL',
+			type: 'string',
+			required: true,
+			default: '',
+			placeholder: 'https://example.com',
+			description: 'This is where the user will be sent when login successfully',
 		},
 		{
 			displayName: 'Logout Redirect URL',
@@ -206,6 +215,16 @@ export const triggerDescription: INodeTypeDescription = {
 					rateLimit: [true],
 				},
 			},
+		},
+		{
+			displayName: 'Login Page Template',
+			name: 'loginTemplate',
+			type: 'string',
+			required: true,
+			typeOptions: {
+				editor: 'htmlEditor',
+			},
+			default: loginPageHTMLTemplate,
 		},
 	],
 };
