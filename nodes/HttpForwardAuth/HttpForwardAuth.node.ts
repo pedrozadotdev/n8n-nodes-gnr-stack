@@ -8,7 +8,7 @@ import type {
 	INodeType,
 } from 'n8n-workflow';
 
-import { TRIGGER_NAME } from './constants';
+import { FORWARDED_USER_HEADER, TRIGGER_NAME } from './constants';
 import { responseDescription } from './descriptions';
 import { getRedisClient } from './transport';
 import type { RedisCredential } from './types';
@@ -56,7 +56,7 @@ export class HttpForwardAuth implements INodeType {
 			}
 
 			const loginTemplate = triggerNode.parameters?.loginTemplate as string;
-			const authHeader = triggerNode.parameters?.authHeader as string;
+			const loginURL = triggerNode.parameters?.loginURL as string;
 			const afterLoginURL = triggerNode.parameters?.afterLoginURL as string;
 			const enableHTTP = triggerNode.parameters?.enableHTTP as boolean;
 			const rateLimit = triggerNode.parameters?.rateLimit as boolean;
@@ -64,8 +64,10 @@ export class HttpForwardAuth implements INodeType {
 			if (!userID) {
 				statusCode = 401;
 				headers['content-type'] = 'text/html';
-				headers[authHeader] = '';
-				responseBody = loginTemplate.replaceAll('#ERROR_MESSAGE#', validationErrorMessage);
+				headers[FORWARDED_USER_HEADER] = '';
+				responseBody = loginTemplate
+					.replaceAll('#ERROR_MESSAGE#', validationErrorMessage)
+					.replaceAll('#ACTION#', loginURL);
 			} else {
 				statusCode = 307;
 				headers.location = afterLoginURL;

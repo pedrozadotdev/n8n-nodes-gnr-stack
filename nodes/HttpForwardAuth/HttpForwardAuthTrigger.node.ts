@@ -6,7 +6,12 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 
-import { SESSION_KEY } from './constants';
+import {
+	FORWARDED_HOST_HEADER,
+	FORWARDED_USER_HEADER,
+	REMOTE_IP_HEADER,
+	SESSION_KEY,
+} from './constants';
 import { triggerDescription } from './descriptions';
 import { getRedisClient } from './transport';
 import type { RedisCredential } from './types';
@@ -33,14 +38,12 @@ export class HttpForwardAuthTrigger implements INodeType {
 		const credentials = await this.getCredentials<RedisCredential>('redis');
 		const redis = await getRedisClient(credentials);
 
-		const authHeader = this.getNodeParameter('authHeader', '') as string;
 		const loginURL = this.getNodeParameter('loginURL', '') as string;
 		const afterLoginURL = this.getNodeParameter('afterLoginURL', '') as string;
 		const logoutURL = this.getNodeParameter('logoutURL', '') as string;
 		const enableHTTP = this.getNodeParameter('enableHTTP', false) as boolean;
 		const rateLimit = this.getNodeParameter('rateLimit', false) as boolean;
-		const remoteIpHeader = this.getNodeParameter('remoteIpHeader', '') as string;
-		const remoteIp = rateLimit ? req.header(remoteIpHeader) : undefined;
+		const remoteIp = rateLimit ? req.header(REMOTE_IP_HEADER) : undefined;
 		const rateLimitErrorMessage = this.getNodeParameter('rateLimitErrorMessage', '') as string;
 		const loginTemplate = this.getNodeParameter('loginTemplate', '') as string;
 
@@ -63,7 +66,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 					// Extend the expire date if needed
 					setSessionTokenCookie(addResHeader, token, session.expiresAt, enableHTTP);
 
-					res.setHeader(authHeader, session.user);
+					res.setHeader(FORWARDED_USER_HEADER, session.user);
 					res.status(200).end();
 				}
 			}
@@ -77,16 +80,20 @@ export class HttpForwardAuthTrigger implements INodeType {
 				res.status(307).redirect(afterLoginURL);
 			} else {
 				deleteSessionTokenCookie(addResHeader);
-				const pageContent = loginTemplate.replaceAll('#ERROR_MESSAGE#', '');
+				const pageContent = loginTemplate
+					.replaceAll('#ERROR_MESSAGE#', '')
+					.replaceAll('#ACTION#', loginURL);
 				res.status(200).send(pageContent).end();
 			}
 		} else if (webhookName === 'default') {
-			const origin = req.header('X-Forwarded-Host');
+			const origin = req.header(FORWARDED_HOST_HEADER);
 			// CSRF protection
 			if (!origin || origin !== loginURL) {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else if (rateLimit && remoteIp && !(await rateLimitConsume(redis, remoteIp))) {
-				const pageContent = loginTemplate.replaceAll('#ERROR_MESSAGE#', rateLimitErrorMessage);
+				const pageContent = loginTemplate
+					.replaceAll('#ERROR_MESSAGE#', rateLimitErrorMessage)
+					.replaceAll('#ACTION#', loginURL);
 				res.status(429).send(pageContent).end();
 			} else {
 				workflowData = [

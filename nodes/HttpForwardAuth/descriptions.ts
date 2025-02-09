@@ -142,14 +142,6 @@ export const triggerDescription: INodeTypeDescription = {
 	activationMessage: 'You can now use it as an authentication middleware.',
 	properties: [
 		{
-			displayName: 'Forward Auth Header',
-			name: 'authHeader',
-			type: 'string',
-			default: 'X-Forwarded-User',
-			required: true,
-			placeholder: 'Ex: X-Forwarded-User',
-		},
-		{
 			displayName: 'Login Redirect URL',
 			name: 'loginURL',
 			type: 'string',
@@ -188,20 +180,6 @@ export const triggerDescription: INodeTypeDescription = {
 			name: 'rateLimit',
 			type: 'boolean',
 			default: false,
-		},
-		{
-			displayName: 'Remote IP Header',
-			name: 'remoteIpHeader',
-			type: 'string',
-			default: '',
-			placeholder: 'Ex: X-Real-IP',
-			description: 'Restrict login attempts by this header',
-			required: true,
-			displayOptions: {
-				show: {
-					rateLimit: [true],
-				},
-			},
 		},
 		{
 			displayName: 'Rate Limit Error Message',
