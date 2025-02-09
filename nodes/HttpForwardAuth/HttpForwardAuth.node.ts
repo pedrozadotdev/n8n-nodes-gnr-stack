@@ -67,7 +67,7 @@ export class HttpForwardAuth implements INodeType {
 				headers[FORWARDED_USER_HEADER] = '';
 				responseBody = loginTemplate
 					.replaceAll('#ERROR_MESSAGE#', validationErrorMessage)
-					.replaceAll('#ACTION#', loginURL);
+					.replaceAll('#LOGIN_URL#', loginURL);
 			} else {
 				statusCode = 307;
 				headers.location = afterLoginURL;

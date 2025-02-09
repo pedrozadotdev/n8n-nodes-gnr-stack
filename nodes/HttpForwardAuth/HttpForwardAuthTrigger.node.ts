@@ -82,7 +82,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 				deleteSessionTokenCookie(addResHeader);
 				const pageContent = loginTemplate
 					.replaceAll('#ERROR_MESSAGE#', '')
-					.replaceAll('#ACTION#', loginURL);
+					.replaceAll('#LOGIN_URL#', loginURL);
 				res.status(200).send(pageContent).end();
 			}
 		} else if (webhookName === 'default') {
@@ -93,7 +93,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 			} else if (rateLimit && remoteIp && !(await rateLimitConsume(redis, remoteIp))) {
 				const pageContent = loginTemplate
 					.replaceAll('#ERROR_MESSAGE#', rateLimitErrorMessage)
-					.replaceAll('#ACTION#', loginURL);
+					.replaceAll('#LOGIN_URL#', loginURL);
 				res.status(429).send(pageContent).end();
 			} else {
 				workflowData = [

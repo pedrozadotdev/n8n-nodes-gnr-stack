@@ -51,9 +51,10 @@ export const responseDescription: INodeTypeDescription = {
 			displayName: 'Validation Error Message',
 			name: 'validationErrorMessage',
 			type: 'string',
-			default: 'Incorrect user or password!',
+			default: '',
 			required: true,
 			placeholder: 'Ex: Incorrect user or password!',
+			description: 'If User ID is empty this message will appear in the response',
 		},
 		{
 			displayName: 'Operation',
