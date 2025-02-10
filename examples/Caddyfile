@@ -1,0 +1,10 @@
+http://localhost {
+
+	redir / /n8n/
+
+	handle_path /n8n/* {
+    reverse_proxy n8n:5678
+	}
+
+  reverse_proxy /whoami* whoami:80
+}

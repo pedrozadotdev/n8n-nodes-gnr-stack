@@ -26,7 +26,12 @@ export const responseDescription: INodeTypeDescription = {
 		},
 	},
 	// eslint-disable-next-line n8n-nodes-base/node-class-description-inputs-wrong-regular-node
-	inputs: [NodeConnectionType.Main],
+	inputs: [
+		{
+			type: NodeConnectionType.Main,
+			maxConnections: 1,
+		},
+	],
 	// eslint-disable-next-line n8n-nodes-base/node-class-description-outputs-wrong
 	outputs: [NodeConnectionType.Main],
 	credentials: [
@@ -99,6 +104,7 @@ export const triggerDescription: INodeTypeDescription = {
 		{
 			displayName: 'LOGIN',
 			type: NodeConnectionType.Main,
+			maxConnections: 1,
 		},
 	],
 	credentials: [

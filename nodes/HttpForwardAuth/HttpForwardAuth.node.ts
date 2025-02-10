@@ -6,6 +6,7 @@ import type {
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
+	INodeParameters,
 } from 'n8n-workflow';
 
 import { FORWARDED_USER_HEADER, TRIGGER_NAME } from './constants';
@@ -28,7 +29,7 @@ export class HttpForwardAuth implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		let returnData: INodeExecutionData[] = [];
+		let returnData: INodeExecutionData[] = [{ json: { status: 'fail' } }];
 		try {
 			const credentials = await this.getCredentials<RedisCredential>('redis');
 			const redis = await getRedisClient(credentials);
@@ -39,13 +40,15 @@ export class HttpForwardAuth implements INodeType {
 			let responseBody: IN8nHttpResponse;
 			// Response Headers
 			const headers = {} as IDataObject;
-			const addResHeader = (key: string, value: string) => (headers[key] = value);
+			const addResHeader = (key: string, value: string) => {
+				headers[key] = value;
+			};
 
 			let statusCode = 200;
 
 			const connectedNodes = this.getParentNodes(this.getNode().name);
-			const triggerNode = connectedNodes.find(({ name }) => name === TRIGGER_NAME);
-			if (!triggerNode) {
+			const triggerInfo = connectedNodes.find(({ name }) => name === TRIGGER_NAME);
+			if (!triggerInfo) {
 				throw new NodeOperationError(
 					this.getNode(),
 					new Error('No HttpForwardAuthTrigger node found in the workflow'),
@@ -54,12 +57,22 @@ export class HttpForwardAuth implements INodeType {
 					},
 				);
 			}
+			const { parameter: triggerParams, item: triggerOutput } = this.getWorkflowDataProxy(0).$node[
+				triggerInfo.name
+			] as {
+				parameter: INodeParameters;
+				item: INodeExecutionData;
+			};
 
-			const loginTemplate = triggerNode.parameters?.loginTemplate as string;
-			const loginURL = triggerNode.parameters?.loginURL as string;
-			const afterLoginURL = triggerNode.parameters?.afterLoginURL as string;
-			const enableHTTP = triggerNode.parameters?.enableHTTP as boolean;
-			const rateLimit = triggerNode.parameters?.rateLimit as boolean;
+			const loginTemplate = triggerParams.loginTemplate as string;
+			const loginURL = triggerParams.loginURL as string;
+			const afterLoginURL = triggerParams.afterLoginURL as string;
+			const enableHTTP = triggerParams.enableHTTP as boolean;
+			const rateLimit = triggerParams.rateLimit as boolean;
+			const remoteIp = rateLimit ? (triggerOutput.json.remoteIp as string) : undefined;
+			if (remoteIp) {
+				returnData[0].json.remoteIp = remoteIp;
+			}
 
 			if (!userID) {
 				statusCode = 401;
@@ -76,15 +89,12 @@ export class HttpForwardAuth implements INodeType {
 				const session = await createSession(redis, token, userID);
 				setSessionTokenCookie(addResHeader, token, session.expiresAt, enableHTTP);
 
-				if (rateLimit) {
-					const remoteIp = this.evaluateExpression(
-						`{{ $(${triggerNode.name}).item.json.remoteIp }}`,
-						0,
-					) as string | undefined;
-					if (remoteIp) {
-						await rateLimitReset(redis, remoteIp);
-					}
+				if (remoteIp) {
+					await rateLimitReset(redis, remoteIp);
 				}
+
+				returnData[0].json.status = 'success';
+				returnData[0].json.user = userID;
 			}
 
 			const response: IN8nHttpFullResponse = {
