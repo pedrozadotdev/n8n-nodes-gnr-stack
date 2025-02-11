@@ -1,10 +1,9 @@
 http://localhost {
 
-	redir / /n8n/
-
 	handle_path /n8n/* {
+		uri replace n8n/icons/CUSTOM//home/node/.n8n/custom/ n8n/icons/CUSTOM/
     reverse_proxy n8n:5678
 	}
 
-  reverse_proxy /whoami* whoami:80
+  reverse_proxy whoami:80
 }

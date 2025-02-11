@@ -1,14 +1,15 @@
 services:
   n8n:
     image: docker.n8n.io/n8nio/n8n
-    user: root
     restart: always
     environment:
       - NODE_ENV=production
       - N8N_PATH=/n8n/
     volumes:
-      - ./data/n8n:/root/.n8n
-      - ../dist:/root/.n8n/custom/HttpForwardAuth
+      - ./data/n8n:/home/node/.n8n
+      - ../dist:/home/node/.n8n/custom
+    ports:
+      - 5678:5678
     depends_on:
       build:
         condition: service_completed_successfully
