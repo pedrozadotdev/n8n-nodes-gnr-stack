@@ -1,5 +1,5 @@
 {
-  "name": "Simple Workflow",
+  "name": "My workflow",
   "nodes": [
     {
       "parameters": {
@@ -11,10 +11,10 @@
       "type": "CUSTOM.httpForwardAuthTrigger",
       "typeVersion": 1,
       "position": [
-        -240,
-        -60
+        -360,
+        20
       ],
-      "id": "15b0a95a-76dd-47a0-bb24-ec6dee01b2a9",
+      "id": "de7c6620-31c8-4701-b870-dc6825487f35",
       "name": "HTTP Forward Auth Trigger",
       "webhookId": "aa1e42ef-7492-4235-9f22-e3c007358d15"
     },
@@ -26,16 +26,91 @@
       "type": "CUSTOM.httpForwardAuth",
       "typeVersion": 1,
       "position": [
-        140,
-        -60
+        920,
+        20
       ],
-      "id": "edeec1be-79c1-4506-a73d-24765355933e",
+      "id": "3368c9bf-3dab-4bd8-9d7f-d5f1abe7610e",
       "name": "HTTP Forward Auth"
+    },
+    {
+      "parameters": {
+        "jsCode": "const db = {\n  \"test1@example.com\": \"g9QaXzlc34l4dEw1c6HOHcBrVP6SFswS|BIVTqZnqdUbrS8JiuugWKl1Ch0NaADWaFcIiDpc4Tac=\",\n  \"test2@example.com\": \"eSOLsrieYnZ96jNCXfalGF15sJxdluc2|cXFQ/PT1VNb/CRM6SA/d+ADQlS1hwDgtg/tuWipDbbo=\",\n  \"test3@example.com\": \"kos8kWXOH7Nr7v72q3kXUzxUwxmKx2uo|Rj3A2BLRCtpKFVjxb6IxuSgLIigbt3wlKazsFGmO5ic=\"\n};\n\nconst userRaw = db[$input.first().json.user];\n\nif(userRaw) {\n  const [salt, hash] = userRaw.split(\"|\");\n  return { salt, hash }\n}\n\nreturn { salt: \"\", hash: \"\" }"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -60,
+        20
+      ],
+      "id": "87fa2215-c45c-4950-ae1a-97216eb30e9f",
+      "name": "Get Data From DB"
+    },
+    {
+      "parameters": {
+        "type": "SHA256",
+        "value": "={{ $('HTTP Forward Auth Trigger').item.json.password }}{{ $json.salt }}",
+        "dataPropertyName": "passwordHashed",
+        "encoding": "base64"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        280,
+        20
+      ],
+      "id": "4ac9ba87-0753-4ad9-af56-acbfdb8ecabf",
+      "name": "Hash Password"
+    },
+    {
+      "parameters": {
+        "jsCode": "if($input.first().json.passwordHashed === $input.first().json.hash){\n  return { user: $('HTTP Forward Auth Trigger').first().json.user }\n}\nreturn { user: \"\" }"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        20
+      ],
+      "id": "c3c058a6-eb0d-418e-81f2-9cf142360e34",
+      "name": "Verify Password"
     }
   ],
   "pinData": {},
   "connections": {
     "HTTP Forward Auth Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Data From DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Data From DB": {
+      "main": [
+        [
+          {
+            "node": "Hash Password",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash Password": {
+      "main": [
+        [
+          {
+            "node": "Verify Password",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Password": {
       "main": [
         [
           {
@@ -54,13 +129,14 @@
     "saveDataSuccessExecution": "none",
     "saveExecutionProgress": false,
     "saveManualExecutions": false,
-    "callerPolicy": "workflowsFromSameOwner"
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
   },
-  "versionId": "bfd96589-b1e3-41d6-9c04-b5a9309ecdbc",
+  "versionId": "9b417754-d9d0-4377-8863-e604f59f97f1",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "92c9b16e2380170534d4abdb7812921e0d2307adc8ac77bc33bdaec9c0b307f5"
+    "instanceId": "505a91c807f383cfa51524b51406539ed2a13b65faca94769375174ae416a1e6"
   },
-  "id": "9X2X5EqmEEKSCGuC",
+  "id": "4hi91Jg1ssmzLJwF",
   "tags": []
 }

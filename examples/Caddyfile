@@ -1,5 +1,7 @@
 :80 {
 
+	rewrite /n8n /n8n/
+
 	handle_path /n8n/* {
 		uri strip_prefix /n8n
 		# Fix custom node icons when using N8N_PATH
