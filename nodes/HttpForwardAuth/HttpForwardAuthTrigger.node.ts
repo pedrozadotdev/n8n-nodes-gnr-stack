@@ -7,11 +7,11 @@ import type {
 } from 'n8n-workflow';
 
 import {
-	FORWARDED_HOST_HEADER,
 	FORWARDED_USER_HEADER,
 	REMOTE_IP_HEADER,
 	SESSION_KEY,
 } from './constants';
+import { cookieParse } from './cookieParser';
 import { triggerDescription } from './descriptions';
 import { getRedisClient } from './transport';
 import type { RedisCredential } from './types';
@@ -35,7 +35,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 		const res = this.getResponseObject();
 		const addResHeader = (key: string, value: string) => res.setHeader(key, value);
 
-		const credentials = await this.getCredentials<RedisCredential>('redis');
+		const credentials = await this.getCredentials('redis') as RedisCredential;
 		const redis = await getRedisClient(credentials);
 
 		const loginURL = this.getNodeParameter('loginURL', '') as string;
@@ -53,8 +53,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 		let noWebhookResponse = true;
 
 		if (webhookName === 'check') {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-			const token = (req.cookies[SESSION_KEY] as string | undefined) ?? null;
+			const token = cookieParse(req.headers.cookie as string | undefined)[SESSION_KEY] ?? null;
 			if (token === null) {
 				res.status(401).redirect(loginURL);
 			} else {
@@ -71,8 +70,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 				}
 			}
 		} else if (webhookName === 'setup') {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-			const token = (req.cookies[SESSION_KEY] as string | undefined) ?? null;
+			const token = cookieParse(req.headers.cookie as string | undefined)[SESSION_KEY] ?? null;
 			const session = token && (await validateSessionToken(redis, token));
 			if (session) {
 				// Extend the expire date if needed
@@ -86,9 +84,9 @@ export class HttpForwardAuthTrigger implements INodeType {
 				res.status(200).send(pageContent).end();
 			}
 		} else if (webhookName === 'default') {
-			const origin = req.header(FORWARDED_HOST_HEADER);
+			const origin = req.header('Origin');
 			// CSRF protection
-			if (!origin || origin !== loginURL) {
+			if (!origin || origin !== new URL(loginURL).origin) {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else if (rateLimit && remoteIp && !(await rateLimitConsume(redis, remoteIp))) {
 				const pageContent = loginTemplate

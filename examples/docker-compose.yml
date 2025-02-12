@@ -5,6 +5,7 @@ services:
     environment:
       - NODE_ENV=production
       - N8N_PATH=/n8n/
+      - WEBHOOK_URL=http://localhost:8080/n8n/
     volumes:
       - ./data/n8n:/home/node/.n8n
       - ../dist:/home/node/.n8n/custom
@@ -35,6 +36,8 @@ services:
   caddy:
     image: caddy:alpine
     restart: always
+    environment:
+      - WEBHOOK_ID=aa1e42ef-7492-4235-9f22-e3c007358d15
     ports:
       - 8080:80
     volumes:

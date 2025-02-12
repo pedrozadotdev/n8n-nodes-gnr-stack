@@ -1,0 +1,66 @@
+{
+  "name": "Simple Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "loginURL": "http://localhost:8080/login",
+        "afterLoginURL": "http://localhost:8080/protected",
+        "logoutURL": "http://localhost:8080/login",
+        "enableHTTP": true
+      },
+      "type": "CUSTOM.httpForwardAuthTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -60
+      ],
+      "id": "15b0a95a-76dd-47a0-bb24-ec6dee01b2a9",
+      "name": "HTTP Forward Auth Trigger",
+      "webhookId": "aa1e42ef-7492-4235-9f22-e3c007358d15"
+    },
+    {
+      "parameters": {
+        "userID": "={{ $json.user }}",
+        "validationErrorMessage": "Incorrect user or password"
+      },
+      "type": "CUSTOM.httpForwardAuth",
+      "typeVersion": 1,
+      "position": [
+        140,
+        -60
+      ],
+      "id": "edeec1be-79c1-4506-a73d-24765355933e",
+      "name": "HTTP Forward Auth"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Forward Auth Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Forward Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "bfd96589-b1e3-41d6-9c04-b5a9309ecdbc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "92c9b16e2380170534d4abdb7812921e0d2307adc8ac77bc33bdaec9c0b307f5"
+  },
+  "id": "9X2X5EqmEEKSCGuC",
+  "tags": []
+}

@@ -31,7 +31,7 @@ export class HttpForwardAuth implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		let returnData: INodeExecutionData[] = [{ json: { status: 'fail' } }];
 		try {
-			const credentials = await this.getCredentials<RedisCredential>('redis');
+			const credentials = await this.getCredentials('redis') as RedisCredential;
 			const redis = await getRedisClient(credentials);
 
 			const userID = this.getNodeParameter('userID', 0) as string | undefined;
@@ -47,7 +47,7 @@ export class HttpForwardAuth implements INodeType {
 			let statusCode = 200;
 
 			const connectedNodes = this.getParentNodes(this.getNode().name);
-			const triggerInfo = connectedNodes.find(({ name }) => name === TRIGGER_NAME);
+			const triggerInfo = connectedNodes.find(({ type }) => type.includes(TRIGGER_NAME));
 			if (!triggerInfo) {
 				throw new NodeOperationError(
 					this.getNode(),
@@ -82,7 +82,7 @@ export class HttpForwardAuth implements INodeType {
 					.replaceAll('#ERROR_MESSAGE#', validationErrorMessage)
 					.replaceAll('#LOGIN_URL#', loginURL);
 			} else {
-				statusCode = 307;
+				statusCode = 302;
 				headers.location = afterLoginURL;
 
 				const token = await generateSessionToken();
@@ -99,6 +99,7 @@ export class HttpForwardAuth implements INodeType {
 
 			const response: IN8nHttpFullResponse = {
 				body: responseBody,
+				__bodyResolved: true,
 				headers,
 				statusCode,
 			};
