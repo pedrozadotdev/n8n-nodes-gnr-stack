@@ -137,3 +137,7 @@ export async function getRedisClient(credentials: RedisCredential): Promise<Redi
 		},
 	});
 }
+
+export function getPoolManagerInstance(): ConnectionPoolManager {
+	return instance
+}

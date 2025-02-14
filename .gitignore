@@ -8,3 +8,4 @@ yarn.lock
 .vscode/launch.json
 examples/data*
 .pnpm-store*
+coverage*

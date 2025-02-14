@@ -22,6 +22,12 @@ module.exports = {
 
 	overrides: [
 		{
+      "files": ["**/test/**/*"],
+      "env": {
+        "jest": true
+      }
+    },
+		{
 			files: ['package.json'],
 			plugins: ['eslint-plugin-n8n-nodes-base'],
 			extends: ['plugin:n8n-nodes-base/community'],

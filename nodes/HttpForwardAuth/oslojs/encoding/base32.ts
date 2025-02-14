@@ -1,12 +1,6 @@
-const enum EncodingPadding {
-	Include = 0,
-	None,
-}
-
 function encodeBase32_internal(
 	bytes: Uint8Array,
 	alphabet: string,
-	padding: EncodingPadding,
 ): string {
 	let result = '';
 	for (let i = 0; i < bytes.byteLength; i += 5) {
@@ -24,11 +18,10 @@ function encodeBase32_internal(
 			if (bufferBitSize >= 5) {
 				result += alphabet[Number((buffer >> BigInt(bufferBitSize - 5)) & 0x1fn)];
 				bufferBitSize -= 5;
+				/* c8 ignore next 4 */
 			} else if (bufferBitSize > 0) {
 				result += alphabet[Number((buffer << BigInt(6 - bufferBitSize)) & 0x3fn)];
 				bufferBitSize = 0;
-			} else if (padding === EncodingPadding.Include) {
-				result += '=';
 			}
 		}
 	}
@@ -38,5 +31,5 @@ function encodeBase32_internal(
 const base32LowerCaseAlphabet = 'abcdefghijklmnopqrstuvwxyz234567';
 
 export function encodeBase32LowerCaseNoPadding(bytes: Uint8Array): string {
-	return encodeBase32_internal(bytes, base32LowerCaseAlphabet, EncodingPadding.None);
+	return encodeBase32_internal(bytes, base32LowerCaseAlphabet);
 }

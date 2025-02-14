@@ -93,7 +93,6 @@ export async function validateSessionToken(
 	if (item === null) {
 		return null;
 	}
-	// eslint-disable-next-line n8n-local-rules/no-uncaught-json-parse
 	const result = JSON.parse(item) as { id: string; user: string; expires_at: number };
 	const session: Session = {
 		id: result.id,
