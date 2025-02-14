@@ -125,8 +125,15 @@ export const triggerDescription: INodeTypeDescription = {
 		},
 		{
 			// @ts-expect-error Add more endpoints
-			name: 'logout',
+			name: 'logoutPage',
 			httpMethod: 'GET',
+			responseMode: 'onReceived',
+			path: '/logout',
+		},
+		{
+			// @ts-expect-error Add more endpoints
+			name: 'logout',
+			httpMethod: 'POST',
 			responseMode: 'onReceived',
 			path: '/logout',
 		},
@@ -149,30 +156,30 @@ export const triggerDescription: INodeTypeDescription = {
 	activationMessage: 'You can now use it as an authentication middleware.',
 	properties: [
 		{
-			displayName: 'Login Redirect URL',
-			name: 'loginURL',
+			displayName: 'Auth URL',
+			name: 'authURL',
 			type: 'string',
 			required: true,
 			default: '',
-			placeholder: 'https://example.com/login',
-			description: 'This is where the user will be sent when not logged in',
+			placeholder: 'https://auth.e.io or https://e.io/auth',
+			description: 'This is where this middleware will be hosted',
 		},
 		{
-			displayName: 'After Login Redirect URL',
-			name: 'afterLoginURL',
+			displayName: 'Login Redirect URL',
+			name: 'loginRedirectURL',
 			type: 'string',
 			required: true,
 			default: '',
-			placeholder: 'https://example.com',
+			placeholder: 'https://e.io/dashboard',
 			description: 'This is where the user will be sent when login successfully',
 		},
 		{
 			displayName: 'Logout Redirect URL',
-			name: 'logoutURL',
+			name: 'logoutRedirectURL',
 			type: 'string',
 			required: true,
 			default: '',
-			placeholder: 'https://example.com/logout',
+			placeholder: 'https://e.io/login',
 			description: 'This is where the user will be sent when logout',
 		},
 		{

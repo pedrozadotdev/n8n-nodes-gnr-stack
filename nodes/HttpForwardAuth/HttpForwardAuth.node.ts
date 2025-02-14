@@ -6,7 +6,6 @@ import type {
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
-	INodeParameters,
 } from 'n8n-workflow';
 
 import { FORWARDED_USER_HEADER, TRIGGER_NAME } from './constants';
@@ -21,6 +20,13 @@ import {
 	setSessionTokenCookie,
 } from './utils';
 
+type TriggerParamsType = {
+	authURL: string;
+	enableHTTP: boolean;
+	loginRedirectURL: string;
+	loginTemplate: string;
+};
+
 export class HttpForwardAuth implements INodeType {
 	description = responseDescription;
 
@@ -31,7 +37,7 @@ export class HttpForwardAuth implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		let returnData: INodeExecutionData[] = [{ json: { status: 'fail' } }];
 		try {
-			const credentials = await this.getCredentials('redis') as RedisCredential;
+			const credentials = (await this.getCredentials('redis')) as RedisCredential;
 			const redis = await getRedisClient(credentials);
 
 			const userID = this.getNodeParameter('userID', 0) as string | undefined;
@@ -57,19 +63,15 @@ export class HttpForwardAuth implements INodeType {
 					},
 				);
 			}
-			const { parameter: triggerParams, item: triggerOutput } = this.getWorkflowDataProxy(0).$node[
-				triggerInfo.name
-			] as {
-				parameter: INodeParameters;
-				item: INodeExecutionData;
+			const {
+				parameter: { authURL, enableHTTP, loginRedirectURL, loginTemplate },
+				data: { remoteIp },
+			} = this.getWorkflowDataProxy(0).$node[triggerInfo.name] as {
+				parameter: TriggerParamsType;
+				data: { remoteIp?: string };
 			};
+			const loginURL = `${authURL}/login`;
 
-			const loginTemplate = triggerParams.loginTemplate as string;
-			const loginURL = triggerParams.loginURL as string;
-			const afterLoginURL = triggerParams.afterLoginURL as string;
-			const enableHTTP = triggerParams.enableHTTP as boolean;
-			const rateLimit = triggerParams.rateLimit as boolean;
-			const remoteIp = rateLimit ? (triggerOutput.json.remoteIp as string) : undefined;
 			if (remoteIp) {
 				returnData[0].json.remoteIp = remoteIp;
 			}
@@ -83,7 +85,7 @@ export class HttpForwardAuth implements INodeType {
 					.replaceAll('#LOGIN_URL#', loginURL);
 			} else {
 				statusCode = 302;
-				headers.location = afterLoginURL;
+				headers.location = loginRedirectURL;
 
 				const token = await generateSessionToken();
 				const session = await createSession(redis, token, userID);

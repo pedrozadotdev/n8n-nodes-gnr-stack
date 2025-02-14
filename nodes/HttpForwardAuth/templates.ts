@@ -135,6 +135,23 @@ export const loginPageHTMLTemplate = `<!DOCTYPE html>
   </body>
 </html>`;
 
+export const logoutPageHTMLTemplate = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logout</title>
+		<script>
+			window.onload = function() {
+				document.forms['logout'].submit();
+			}
+		</script>
+	</head>
+	<body>
+	<form name="logout" method="post" action="#LOGOUT_URL#"></form>
+	</body>
+</html>`;
+
 export const redisRLScript = `
 -- Returns 1 if allowed, 0 if not
 local key                   = KEYS[1]

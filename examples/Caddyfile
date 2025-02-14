@@ -7,7 +7,7 @@
 		# Fix custom node icons when using N8N_PATH
 		uri replace icons/CUSTOM/home/node/.n8n/custom/ icons/CUSTOM/
     reverse_proxy n8n:5678 {
-			header_up X-Real-IP {http.request.remote_host}
+			header_up X-Real-IP {remote_host}
 	  }
 	}
 
@@ -21,7 +21,7 @@
 	handle /login {
 		uri replace login webhook/{$WEBHOOK_ID}/login
 		reverse_proxy n8n:5678 {
-			header_up X-Real-IP {http.request.remote_host}
+			header_up X-Real-IP {remote_host}
 		}
 	}
 

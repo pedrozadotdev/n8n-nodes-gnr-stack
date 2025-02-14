@@ -6,13 +6,10 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 
-import {
-	FORWARDED_USER_HEADER,
-	REMOTE_IP_HEADER,
-	SESSION_KEY,
-} from './constants';
+import { FORWARDED_USER_HEADER, REMOTE_IP_HEADER, SESSION_KEY } from './constants';
 import { cookieParse } from './cookieParser';
 import { triggerDescription } from './descriptions';
+import { logoutPageHTMLTemplate } from './templates';
 import { getRedisClient } from './transport';
 import type { RedisCredential } from './types';
 import {
@@ -35,12 +32,13 @@ export class HttpForwardAuthTrigger implements INodeType {
 		const res = this.getResponseObject();
 		const addResHeader = (key: string, value: string) => res.setHeader(key, value);
 
-		const credentials = await this.getCredentials('redis') as RedisCredential;
+		const credentials = (await this.getCredentials('redis')) as RedisCredential;
 		const redis = await getRedisClient(credentials);
 
-		const loginURL = this.getNodeParameter('loginURL', '') as string;
-		const afterLoginURL = this.getNodeParameter('afterLoginURL', '') as string;
-		const logoutURL = this.getNodeParameter('logoutURL', '') as string;
+		const authURL = this.getNodeParameter('authURL', '') as string;
+		const loginURL = `${authURL}/login`;
+		const loginRedirectURL = this.getNodeParameter('loginRedirectURL', '') as string;
+		const logoutRedirectURL = this.getNodeParameter('logoutRedirectURL', '') as string;
 		const enableHTTP = this.getNodeParameter('enableHTTP', false) as boolean;
 		const rateLimit = this.getNodeParameter('rateLimit', false) as boolean;
 		const remoteIp = rateLimit ? req.header(REMOTE_IP_HEADER) : undefined;
@@ -53,7 +51,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 		let noWebhookResponse = true;
 
 		if (webhookName === 'check') {
-			const token = cookieParse(req.headers.cookie as string | undefined)[SESSION_KEY] ?? null;
+			const token = cookieParse(req.headers.cookie)[SESSION_KEY] ?? null;
 			if (token === null) {
 				res.status(401).redirect(loginURL);
 			} else {
@@ -70,12 +68,12 @@ export class HttpForwardAuthTrigger implements INodeType {
 				}
 			}
 		} else if (webhookName === 'setup') {
-			const token = cookieParse(req.headers.cookie as string | undefined)[SESSION_KEY] ?? null;
+			const token = cookieParse(req.headers.cookie)[SESSION_KEY] ?? null;
 			const session = token && (await validateSessionToken(redis, token));
 			if (session) {
 				// Extend the expire date if needed
 				setSessionTokenCookie(addResHeader, token, session.expiresAt, enableHTTP);
-				res.status(307).redirect(afterLoginURL);
+				res.status(302).redirect(loginRedirectURL);
 			} else {
 				deleteSessionTokenCookie(addResHeader);
 				const pageContent = loginTemplate
@@ -84,9 +82,9 @@ export class HttpForwardAuthTrigger implements INodeType {
 				res.status(200).send(pageContent).end();
 			}
 		} else if (webhookName === 'default') {
-			const origin = req.header('Origin');
 			// CSRF protection
-			if (!origin || origin !== new URL(loginURL).origin) {
+			const origin = req.header('Origin');
+			if (!origin || origin !== new URL(authURL).origin) {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else if (rateLimit && remoteIp && !(await rateLimitConsume(redis, remoteIp))) {
 				const pageContent = loginTemplate
@@ -106,9 +104,18 @@ export class HttpForwardAuthTrigger implements INodeType {
 				];
 				noWebhookResponse = false;
 			}
+		} else if (webhookName === 'logoutPage') {
+			const pageContent = logoutPageHTMLTemplate.replace('#LOGOUT_URL#', `${authURL}/logout`);
+			res.status(200).send(pageContent).end();
 		} else if (webhookName === 'logout') {
-			deleteSessionTokenCookie(addResHeader);
-			res.redirect(logoutURL);
+			// CSRF protection
+			const origin = req.header('Origin');
+			if (!origin || origin !== new URL(authURL).origin) {
+				res.status(403).send('Error 403 - Forbidden').end();
+			} else {
+				deleteSessionTokenCookie(addResHeader);
+				res.redirect(logoutRedirectURL);
+			}
 		}
 		return {
 			noWebhookResponse,
