@@ -114,7 +114,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else {
 				deleteSessionTokenCookie(addResHeader);
-				res.redirect(logoutRedirectURL);
+				res.status(302).redirect(logoutRedirectURL);
 			}
 		}
 		return {

@@ -7,7 +7,7 @@ import {
 import { SHA256 } from '../../nodes/HttpForwardAuth/oslojs/sha2/sha256';
 import { bigEndian, rotr32 } from '../../nodes/HttpForwardAuth/oslojs/binary';
 
-describe('Oslojs', () => {
+describe('Oslojs Suite', () => {
 	it('Should encode to HexLowerCase', () => {
 		const cases = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 		for (const length of cases) {

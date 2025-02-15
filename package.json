@@ -30,7 +30,7 @@
     "lint": "eslint nodes credentials package.json",
     "lintfix": "eslint nodes credentials package.json --fix",
     "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json",
-    "test": "jest",
+    "test": "jest --silent=false",
     "test-watch": "jest --watch"
   },
   "files": [
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@scure/base": "^1.2.4",
+    "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.1",
     "@typescript-eslint/parser": "^7.15.0",

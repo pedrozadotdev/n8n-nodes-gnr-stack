@@ -1,3 +1,4 @@
+/* c8 ignore start */
 import type { createClient } from 'redis';
 
 export type RedisCredential = {
@@ -19,3 +20,4 @@ export type Redis = {
 	client: ReturnType<typeof createClient>;
 	RATE_LIMIT_SHA: string;
 };
+/* c8 ignore stop */

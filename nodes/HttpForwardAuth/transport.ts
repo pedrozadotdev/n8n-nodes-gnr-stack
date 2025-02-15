@@ -5,8 +5,8 @@ import { setupRedisClient } from './utils';
 
 let instance: ConnectionPoolManager;
 
-// 2 hours
-const ttl = 2 * 60 * 60 * 1000;
+// ~2 hours
+const ttl = 2 * 60 * 60 * 1000 - 1;
 
 // 30 minutes
 const cleanUpInterval = 30 * 60 * 1000;

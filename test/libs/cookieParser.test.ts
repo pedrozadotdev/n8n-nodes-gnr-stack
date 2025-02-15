@@ -10,7 +10,7 @@ const cookies = [
 	'asd-asd-asd',
 ];
 
-describe('CookieParse', () => {
+describe('CookieParse Suite', () => {
 	it('Should parse cookies correctly', () => {
 		expect(cookieParse(cookies[0])['AAA-Aaaa-Aaaaaa']).toBe('00-Aaa-0000');
 		expect(cookieParse(cookies[0]).DddDD).toBe('DD:DD:Ddd_Ddddddddd:33.33:-333.33:d3');

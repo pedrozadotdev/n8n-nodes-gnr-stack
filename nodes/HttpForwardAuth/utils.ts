@@ -132,7 +132,7 @@ export function setSessionTokenCookie(
 ): void {
 	addResHeader(
 		'Set-Cookie',
-		`${SESSION_KEY}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/${enableHTTP ? '' : '; Secure;'}`,
+		`${SESSION_KEY}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/${enableHTTP ? '' : '; Secure'}`,
 	);
 }
 
@@ -142,7 +142,7 @@ export function deleteSessionTokenCookie(
 ): void {
 	addResHeader(
 		'Set-Cookie',
-		`${SESSION_KEY}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/${enableHTTP ? '' : '; Secure;'}`,
+		`${SESSION_KEY}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/${enableHTTP ? '' : '; Secure'}`,
 	);
 }
 
