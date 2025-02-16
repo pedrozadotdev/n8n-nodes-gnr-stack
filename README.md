@@ -1,6 +1,12 @@
-# n8n-nodes-http-forward-auth
+# n8n-nodes-gnr-stack
 
-This is an n8n community node. It can be used as a HTTP forward auth middleware with reverse proxies like Traefik and Caddy.
+This is a set of n8n community nodes. It may be used in GNR Stack.
+
+## HTTP Forward Auth Trigger/Response Node
+It can be used as a HTTP forward auth middleware with reverse proxies like Traefik and Caddy.
+
+## Redis Vector Store Node
+This is a node that use Redis Stack Vector database as a vector store for your agents.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 

@@ -1,5 +1,5 @@
-import { getRedisClient } from "../../nodes/HttpForwardAuth/transport";
-import { resetJest, resetRedis, setupRedis, credentialsMock } from "../helpers";
+import { resetJest, resetRedis, setupResponse } from '../helpers';
+import { HttpForwardAuth } from '../../nodes/HttpForwardAuth/HttpForwardAuth.node';
 
 jest.mock('redis', () => ({
 	__esModule: true,
@@ -12,9 +12,11 @@ describe('Response Suite', () => {
 	afterAll(resetJest);
 	afterEach(resetRedis);
 
-	it('Test', async () => {
-		setupRedis();
-		await getRedisClient(credentialsMock);
-		expect(true).toBe(true)
-	})
-});
+	it('Should fail if no HttpForwardAuthTrigger is found on workflow', async () => {
+		const { context } = setupResponse();
+		const node = new HttpForwardAuth();
+
+		const bindExecute = node.execute.bind(context);
+		expect(() => bindExecute()).rejects.toThrow('No HttpForwardAuthTrigger node found in the workflow')
+	});
+})

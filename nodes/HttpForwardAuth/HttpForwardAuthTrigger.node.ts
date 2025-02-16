@@ -41,7 +41,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 		const logoutRedirectURL = this.getNodeParameter('logoutRedirectURL', '') as string;
 		const enableHTTP = this.getNodeParameter('enableHTTP', false) as boolean;
 		const rateLimit = this.getNodeParameter('rateLimit', false) as boolean;
-		const remoteIp = rateLimit ? req.header(REMOTE_IP_HEADER) : undefined;
+		const remoteIp = rateLimit ? req.headers[REMOTE_IP_HEADER] as string : undefined;
 		const rateLimitErrorMessage = this.getNodeParameter('rateLimitErrorMessage', '') as string;
 		const loginTemplate = this.getNodeParameter('loginTemplate', '') as string;
 
@@ -83,7 +83,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 			}
 		} else if (webhookName === 'default') {
 			// CSRF protection
-			const origin = req.header('Origin');
+			const origin = req.headers.Origin;
 			if (!origin || origin !== new URL(authURL).origin) {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else if (rateLimit && remoteIp && !(await rateLimitConsume(redis, remoteIp))) {
@@ -109,7 +109,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 			res.status(200).send(pageContent).end();
 		} else if (webhookName === 'logout') {
 			// CSRF protection
-			const origin = req.header('Origin');
+			const origin = req.headers.Origin;
 			if (!origin || origin !== new URL(authURL).origin) {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else {
