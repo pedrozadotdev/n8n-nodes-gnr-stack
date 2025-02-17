@@ -107,6 +107,15 @@ export class HttpForwardAuth implements INodeType {
 			};
 			this.sendResponse(response);
 		} catch (error) {
+			this.sendResponse({
+				body: '500 Internal Server Error',
+				__bodyResolved: true,
+				headers: {
+					[FORWARDED_USER_HEADER]: '',
+				},
+				statusCode: 500,
+			});
+
 			if (this.continueOnFail()) {
 				returnData = [{ json: { error: (error as { message: string }).message } }];
 				return [returnData];

@@ -42,6 +42,7 @@ type ResponseOpts = {
 		data?: Record<string, unknown>,
 		params?: TriggerOpts['params']
 	}
+	continueOnFail: boolean;
 };
 
 export const setupRedis = (mockOverrides?: Record<string, unknown>) => {
@@ -183,7 +184,8 @@ const defaultResponseOpts: ResponseOpts = {
 			loginTemplate: '#LOGIN_URL#|#ERROR_MESSAGE#'
 		},
 		data: { remoteIp: 'REMOTE_IP' }
-	}
+	},
+	continueOnFail: false
 };
 
 export const setupResponse = (opts?: Partial<ResponseOpts>) => {
@@ -194,7 +196,7 @@ export const setupResponse = (opts?: Partial<ResponseOpts>) => {
 			...defaultResponseOpts.params,
 			...(opts?.params ?? {}),
 		},
-		parentNodes: [...(opts?.parentNodes ?? [])],
+		parentNodes: [...(opts?.parentNodes ?? defaultResponseOpts.parentNodes)],
 		triggerData: {
 			params: {
 				...defaultResponseOpts.triggerData.params,
@@ -204,7 +206,8 @@ export const setupResponse = (opts?: Partial<ResponseOpts>) => {
 				...defaultResponseOpts.triggerData.data,
 				...(opts?.triggerData?.data ?? {})
 			}
-		}
+		},
+		continueOnFail: opts?.continueOnFail ?? defaultResponseOpts.continueOnFail
 	};
 
 	const mocks = {
@@ -227,7 +230,7 @@ export const setupResponse = (opts?: Partial<ResponseOpts>) => {
 			}
 		}),
 		sendResponse: sendResponseMock,
-		continueOnFail: () => false,
+		continueOnFail: () => store.continueOnFail,
 	});
 
 	return { context, mocks };
