@@ -82,7 +82,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 			}
 		} else if (webhookName === 'default') {
 			// CSRF protection
-			const origin = req.headers.Origin;
+			const { origin } = req.headers;
 			if (!origin || origin !== new URL(authURL).origin) {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else if (rateLimit && remoteIp && !(await rateLimitConsume(redis, remoteIp))) {
@@ -108,7 +108,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 			res.status(200).send(pageContent).end();
 		} else if (webhookName === 'logout') {
 			// CSRF protection
-			const origin = req.headers.Origin;
+			const { origin } = req.headers;
 			if (!origin || origin !== new URL(authURL).origin) {
 				res.status(403).send('Error 403 - Forbidden').end();
 			} else {

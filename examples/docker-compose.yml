@@ -40,24 +40,24 @@ services:
       - ./data/grist:/persist
     environment:
       - GRIST_SESSION_SECRET=invent-a-secret-here
-      - GRIST_DEFAULT_EMAIL=your-email@example.com
+      - GRIST_DEFAULT_EMAIL=admin@example.com
       - GRIST_SANDBOX_FLAVOR=gvisor
       - APP_HOME_URL=http://localhost:8080
       - GRIST_SINGLE_ORG=example-com
       - COOKIE_MAX_AGE=604800000
       - GRIST_HIDE_UI_ELEMENTS=helpCenter,billing,templates,createSite,multiSite,multiAccounts,sendToDrive,tutorials,supportGrist
-      - GRIST_PAGE_TITLE_SUFFIX=" - Example.com"
+      - GRIST_PAGE_TITLE_SUFFIX=
       - GRIST_WIDGET_LIST_URL="https://github.com/gristlabs/grist-widget/releases/download/latest/manifest.json"
       - ALLOWED_WEBHOOK_DOMAINS=n8n:5678
       - GRIST_FORWARD_AUTH_HEADER=X-Forwarded-User
       - GRIST_FORWARD_AUTH_LOGOUT_PATH=/_auth/logout
-      # - GRIST_DOCS_MINIO_ACCESS_KEY=grist
-      # - GRIST_DOCS_MINIO_SECRET_KEY=grist
-      # - GRIST_DOCS_MINIO_ENDPOINT=s3
-      # - GRIST_DOCS_MINIO_PORT=8333
-      # - GRIST_DOCS_MINIO_USE_SSL=0
-      # - GRIST_DOCS_MINIO_BUCKET=grist
       - REDIS_URL=redis://redis:6379
+      # - GRIST_DOCS_MINIO_ACCESS_KEY=
+      # - GRIST_DOCS_MINIO_SECRET_KEY=
+      # - GRIST_DOCS_MINIO_ENDPOINT=
+      # - GRIST_DOCS_MINIO_PORT=
+      # - GRIST_DOCS_MINIO_USE_SSL=
+      # - GRIST_DOCS_MINIO_BUCKET=
     depends_on:
       redis:
         condition: service_healthy

@@ -15,14 +15,14 @@
 	}
 
 	handle /_auth/login {
-		uri replace /_auth/login webhook/{$WEBHOOK_ID}/login
+		uri replace _auth webhook/{$WEBHOOK_ID}
 		reverse_proxy n8n:5678 {
 			header_up X-Real-IP {remote_host}
 		}
 	}
 
 	handle /_auth/logout {
-		uri replace /_auth/logout webhook/{$WEBHOOK_ID}/logout
+		uri replace _auth webhook/{$WEBHOOK_ID}
 		reverse_proxy n8n:5678
 	}
 

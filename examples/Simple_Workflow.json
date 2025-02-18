@@ -1,20 +1,20 @@
 {
-  "name": "My workflow",
+  "name": "Simple Workflow",
   "nodes": [
     {
       "parameters": {
-        "loginURL": "http://localhost:8080/login",
-        "afterLoginURL": "http://localhost:8080/protected",
-        "logoutURL": "http://localhost:8080/login",
+        "authURL": "http://localhost:8080/_auth",
+        "loginRedirectURL": "http://localhost:8080",
+        "logoutRedirectURL": "http://localhost:8080/signed-out",
         "enableHTTP": true
       },
       "type": "CUSTOM.httpForwardAuthTrigger",
       "typeVersion": 1,
       "position": [
-        -360,
-        20
+        0,
+        0
       ],
-      "id": "de7c6620-31c8-4701-b870-dc6825487f35",
+      "id": "69c907ff-c556-458f-89e4-cd68c6d2bfa8",
       "name": "HTTP Forward Auth Trigger",
       "webhookId": "aa1e42ef-7492-4235-9f22-e3c007358d15"
     },
@@ -26,23 +26,23 @@
       "type": "CUSTOM.httpForwardAuth",
       "typeVersion": 1,
       "position": [
-        920,
-        20
+        1280,
+        0
       ],
-      "id": "3368c9bf-3dab-4bd8-9d7f-d5f1abe7610e",
+      "id": "5c5bd1f9-68ca-45cc-9c3d-169bd5fed21b",
       "name": "HTTP Forward Auth"
     },
     {
       "parameters": {
-        "jsCode": "const db = {\n  \"test1@example.com\": \"g9QaXzlc34l4dEw1c6HOHcBrVP6SFswS|BIVTqZnqdUbrS8JiuugWKl1Ch0NaADWaFcIiDpc4Tac=\",\n  \"test2@example.com\": \"eSOLsrieYnZ96jNCXfalGF15sJxdluc2|cXFQ/PT1VNb/CRM6SA/d+ADQlS1hwDgtg/tuWipDbbo=\",\n  \"test3@example.com\": \"kos8kWXOH7Nr7v72q3kXUzxUwxmKx2uo|Rj3A2BLRCtpKFVjxb6IxuSgLIigbt3wlKazsFGmO5ic=\"\n};\n\nconst userRaw = db[$input.first().json.user];\n\nif(userRaw) {\n  const [salt, hash] = userRaw.split(\"|\");\n  return { salt, hash }\n}\n\nreturn { salt: \"\", hash: \"\" }"
+        "jsCode": "const db = {\n  \"admin@example.com\": \"g9QaXzlc34l4dEw1c6HOHcBrVP6SFswS|Q5LA5FkQb1HpuRz0ppjnQPm13kpyjy7PdgRKIb+VRPI=\" \n};\n\nconst userRaw = db[$input.first().json.user];\n\nif(userRaw) {\n  const [salt, hash] = userRaw.split(\"|\");\n  return { salt, hash }\n}\n\nreturn { salt: \"\", hash: \"\" }"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -60,
-        20
+        300,
+        0
       ],
-      "id": "87fa2215-c45c-4950-ae1a-97216eb30e9f",
+      "id": "1dfbe11d-385d-4eea-9a0f-ebe3425fa6c3",
       "name": "Get Data From DB"
     },
     {
@@ -55,10 +55,10 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 1,
       "position": [
-        280,
-        20
+        640,
+        0
       ],
-      "id": "4ac9ba87-0753-4ad9-af56-acbfdb8ecabf",
+      "id": "ba283396-0f28-43d7-b460-df3291d5d867",
       "name": "Hash Password"
     },
     {
@@ -68,11 +68,24 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        600,
-        20
+        960,
+        0
       ],
-      "id": "c3c058a6-eb0d-418e-81f2-9cf142360e34",
+      "id": "6810f87d-f5b4-40ec-872e-9108167f2dcd",
       "name": "Verify Password"
+    },
+    {
+      "parameters": {
+        "content": "## Access Info\nuser: admin@example.com\npassword: password"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        -180
+      ],
+      "typeVersion": 1,
+      "id": "ad36117b-104b-4f40-9240-c83f909a8085",
+      "name": "Sticky Note"
     }
   ],
   "pinData": {},
@@ -124,19 +137,12 @@
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1",
-    "saveDataErrorExecution": "none",
-    "saveDataSuccessExecution": "none",
-    "saveExecutionProgress": false,
-    "saveManualExecutions": false,
-    "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": -1
+    "executionOrder": "v1"
   },
-  "versionId": "9b417754-d9d0-4377-8863-e604f59f97f1",
+  "versionId": "86c9094b-196d-49e0-be04-60f19353569a",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "505a91c807f383cfa51524b51406539ed2a13b65faca94769375174ae416a1e6"
+    "templateCredsSetupCompleted": true
   },
-  "id": "4hi91Jg1ssmzLJwF",
+  "id": "DRLuFvbB6tyPxGpi",
   "tags": []
 }

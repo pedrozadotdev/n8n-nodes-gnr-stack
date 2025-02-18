@@ -35,9 +35,17 @@ N8N 1.76.1 and above.
 
 ## Usage
 
-Se examples folder
+1. Run `cd examples`;
+2. Run `docker compose up -d`;
+3. Access [http://localhost:8081](http://localhost:8081) and setup N8N;
+4. Create a **Redis Credential** and change **Host** field to **redis**;
+5. Create a workflow and import the **Simple_Workflow.json** file;
+6. Use that credential in **HTTP Forward Auth Trigger** and **HTTP Forward Auth** nodes;
+7. Activate the workflow and access [http://localhost:8080](http://localhost:8080).
+
 
 ## Resources
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
 * [Caddy Forward Auth](https://caddyserver.com/docs/caddyfile/directives/forward_auth)
+* [RedisVectorStore](https://js.langchain.com/docs/integrations/vectorstores/redis/)
