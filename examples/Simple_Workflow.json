@@ -3,46 +3,15 @@
   "nodes": [
     {
       "parameters": {
-        "authURL": "http://localhost:8080/_auth",
-        "loginRedirectURL": "http://localhost:8080",
-        "logoutRedirectURL": "http://localhost:8080/signed-out",
-        "enableHTTP": true
-      },
-      "type": "CUSTOM.httpForwardAuthTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "69c907ff-c556-458f-89e4-cd68c6d2bfa8",
-      "name": "HTTP Forward Auth Trigger",
-      "webhookId": "aa1e42ef-7492-4235-9f22-e3c007358d15"
-    },
-    {
-      "parameters": {
-        "userID": "={{ $json.user }}",
-        "validationErrorMessage": "Incorrect user or password"
-      },
-      "type": "CUSTOM.httpForwardAuth",
-      "typeVersion": 1,
-      "position": [
-        1280,
-        0
-      ],
-      "id": "5c5bd1f9-68ca-45cc-9c3d-169bd5fed21b",
-      "name": "HTTP Forward Auth"
-    },
-    {
-      "parameters": {
         "jsCode": "const db = {\n  \"admin@example.com\": \"g9QaXzlc34l4dEw1c6HOHcBrVP6SFswS|Q5LA5FkQb1HpuRz0ppjnQPm13kpyjy7PdgRKIb+VRPI=\" \n};\n\nconst userRaw = db[$input.first().json.user];\n\nif(userRaw) {\n  const [salt, hash] = userRaw.split(\"|\");\n  return { salt, hash }\n}\n\nreturn { salt: \"\", hash: \"\" }"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        300,
-        0
+        340,
+        -60
       ],
-      "id": "1dfbe11d-385d-4eea-9a0f-ebe3425fa6c3",
+      "id": "5ecdfa7f-5afb-4680-afd3-fa292c756062",
       "name": "Get Data From DB"
     },
     {
@@ -55,10 +24,10 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 1,
       "position": [
-        640,
-        0
+        680,
+        -60
       ],
-      "id": "ba283396-0f28-43d7-b460-df3291d5d867",
+      "id": "be86ee41-9cfc-49bd-bbc4-485aa7ad24a7",
       "name": "Hash Password"
     },
     {
@@ -68,39 +37,75 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        0
+        1000,
+        -60
       ],
-      "id": "6810f87d-f5b4-40ec-872e-9108167f2dcd",
+      "id": "1df7b375-80d8-4a19-8467-c9fd6f4afdc5",
       "name": "Verify Password"
     },
     {
       "parameters": {
-        "content": "## Access Info\nuser: admin@example.com\npassword: password"
+        "content": "## Access Info\nUser: admin@example.com\nPassword: password"
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        240,
-        -180
+        280,
+        -240
       ],
       "typeVersion": 1,
-      "id": "ad36117b-104b-4f40-9240-c83f909a8085",
+      "id": "1eea93b6-f69e-4cc0-a304-734d4f8d34a3",
       "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "authURL": "http://localhost:8080/_auth",
+        "loginRedirectURL": "http://localhost:8080",
+        "logoutRedirectURL": "http://localhost:8080/signed-out",
+        "enableHTTP": true
+      },
+      "type": "n8n-nodes-gnr-stack.httpForwardAuthTrigger",
+      "typeVersion": 1,
+      "position": [
+        40,
+        -60
+      ],
+      "id": "13d37ab5-06fd-4aca-bc0b-8a32bf6e6d6d",
+      "name": "HTTP Forward Auth Trigger",
+      "webhookId": "b45467ee-fe7e-4479-a25e-601b17eaf6a0"
+    },
+    {
+      "parameters": {
+        "userID": "={{ $json.user }}",
+        "validationErrorMessage": "Incorrect user or password"
+      },
+      "type": "n8n-nodes-gnr-stack.httpForwardAuth",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        -60
+      ],
+      "id": "ecc3f9fa-c2c4-4652-8ec1-f78d4d7e95a1",
+      "name": "HTTP Forward Auth"
+    },
+    {
+      "parameters": {
+        "content": "## Security Advices\n\n1. Never ever saves user's password in plain text;\n2. Hash the password and [salt it](https://auth0.com/blog/adding-salt-to-hashing-a-better-way-to-store-passwords/);\n3. Disable all execution data in this workflow **Settings**.",
+        "height": 180,
+        "width": 480,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        580,
+        -440
+      ],
+      "typeVersion": 1,
+      "id": "996eb8ff-50f9-496f-96e5-cb18c1bf3423",
+      "name": "Sticky Note1"
     }
   ],
   "pinData": {},
   "connections": {
-    "HTTP Forward Auth Trigger": {
-      "main": [
-        [
-          {
-            "node": "Get Data From DB",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get Data From DB": {
       "main": [
         [
@@ -123,6 +128,17 @@
         ]
       ]
     },
+    "HTTP Forward Auth Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Data From DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Verify Password": {
       "main": [
         [
@@ -137,12 +153,15 @@
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
   },
-  "versionId": "86c9094b-196d-49e0-be04-60f19353569a",
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "id": "DRLuFvbB6tyPxGpi",
+  "versionId": "4853b549-0175-4759-a9a4-154369561659",
+  "id": "qOvUbar90kkeaUsi",
   "tags": []
 }

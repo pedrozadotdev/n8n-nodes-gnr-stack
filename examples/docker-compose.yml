@@ -6,19 +6,8 @@ services:
       - NODE_ENV=production
     volumes:
       - ./data/n8n:/home/node/.n8n
-      - ../dist:/home/node/.n8n/custom
     ports:
       - 8081:5678
-    depends_on:
-      build:
-        condition: service_completed_successfully
-
-  build:
-    image: gplane/pnpm:node20-alpine
-    volumes:
-      - ..:/build
-    working_dir: /build
-    command: ["run", "build-docker"]
 
   redis:
     image: redis/redis-stack:latest
@@ -65,7 +54,7 @@ services:
     image: caddy:alpine
     restart: always
     environment:
-      - WEBHOOK_ID=aa1e42ef-7492-4235-9f22-e3c007358d15
+      - WEBHOOK_ID=b45467ee-fe7e-4479-a25e-601b17eaf6a0
     ports:
       - 8080:8080
     volumes:
