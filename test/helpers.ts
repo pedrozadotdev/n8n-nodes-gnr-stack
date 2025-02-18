@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { RedisCredential } from '../nodes/HttpForwardAuth/types';
+import type { RedisCredential } from '../nodes/common/types';
 import type {
 	IExecuteFunctions,
 	INode,
@@ -10,8 +10,8 @@ import type {
 
 import { createClient } from 'redis';
 import { mock } from 'jest-mock-extended';
-import { getPoolManagerInstance } from '../nodes/HttpForwardAuth/transport';
-import { TRIGGER_NAME } from '../nodes/HttpForwardAuth/constants';
+import { getPoolManagerInstance } from '../nodes/common/transport';
+import { TRIGGER_NAME } from '../nodes/common/constants';
 
 type TriggerOpts = {
 	request: {

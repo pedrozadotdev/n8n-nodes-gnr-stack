@@ -1,6 +1,6 @@
 # n8n-nodes-gnr-stack
 
-This is a set of n8n community nodes. It may be used in GNR Stack.
+This is a set of n8n community nodes. It may be used in GNR(Grist/N8n/Redis) Stack.
 
 ## HTTP Forward Auth Trigger/Response Node
 It can be used as a HTTP forward auth middleware with reverse proxies like Traefik and Caddy.
@@ -27,7 +27,7 @@ _List the operations supported by your node._
 
 ## Credentials
 
-Use [Redis](https://docs.n8n.io/integrations/builtin/credentials/redis/) as session data storage.
+Use [Redis](https://docs.n8n.io/integrations/builtin/credentials/redis/) as data storage.
 
 ## Compatibility
 
@@ -35,7 +35,7 @@ N8N 1.76.1 and above.
 
 ## Usage
 
-TODO
+Se examples folder
 
 ## Resources
 

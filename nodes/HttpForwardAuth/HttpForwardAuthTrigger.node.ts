@@ -6,19 +6,19 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 
-import { FORWARDED_USER_HEADER, REMOTE_IP_HEADER, SESSION_KEY } from './constants';
-import { cookieParse } from './cookieParser';
+import { FORWARDED_USER_HEADER, REMOTE_IP_HEADER, SESSION_KEY } from '../common/constants';
+import { cookieParse } from '../common/cookieParser';
 import { triggerDescription } from './descriptions';
 import { logoutPageHTMLTemplate } from './templates';
-import { getRedisClient } from './transport';
-import type { RedisCredential } from './types';
+import { getRedisClient } from '../common/transport';
+import type { RedisCredential } from '../common/types';
 import {
 	deleteSessionTokenCookie,
 	rateLimitConsume,
 	redisConnectionTest,
 	setSessionTokenCookie,
 	validateSessionToken,
-} from './utils';
+} from '../common/utils';
 
 export class HttpForwardAuthTrigger implements INodeType {
 	description = triggerDescription;
@@ -28,8 +28,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-		const req = this.getRequestObject();
-		const res = this.getResponseObject();
+		const [req, res] = [this.getRequestObject(), this.getResponseObject()];
 		const addResHeader = (key: string, value: string) => res.setHeader(key, value);
 
 		const credentials = (await this.getCredentials('redis')) as RedisCredential;
@@ -41,7 +40,7 @@ export class HttpForwardAuthTrigger implements INodeType {
 		const logoutRedirectURL = this.getNodeParameter('logoutRedirectURL', '') as string;
 		const enableHTTP = this.getNodeParameter('enableHTTP', false) as boolean;
 		const rateLimit = this.getNodeParameter('rateLimit', false) as boolean;
-		const remoteIp = rateLimit ? req.headers[REMOTE_IP_HEADER] as string : undefined;
+		const remoteIp = rateLimit ? (req.headers[REMOTE_IP_HEADER] as string) : undefined;
 		const rateLimitErrorMessage = this.getNodeParameter('rateLimitErrorMessage', '') as string;
 		const loginTemplate = this.getNodeParameter('loginTemplate', '') as string;
 

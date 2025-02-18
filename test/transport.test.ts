@@ -1,4 +1,4 @@
-import { getRedisClient } from '../nodes/HttpForwardAuth/transport';
+import { getRedisClient } from '../nodes/common/transport';
 import { credentialsMock, setupRedis, resetRedis, resetJest } from './helpers';
 
 jest.mock('redis', () => ({

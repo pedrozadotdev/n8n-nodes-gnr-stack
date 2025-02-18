@@ -1,34 +1,32 @@
-:80 {
+:8080 {
 
-	rewrite /n8n /n8n/
-
-	handle_path /n8n/* {
+	handle_path /n8n/webhook/* {
 		uri strip_prefix /n8n
-		# Fix custom node icons when using N8N_PATH
-		uri replace icons/CUSTOM/home/node/.n8n/custom/ icons/CUSTOM/
     reverse_proxy n8n:5678 {
 			header_up X-Real-IP {remote_host}
 	  }
 	}
 
-	handle /protected {
+	handle /auth/login {
 		forward_auth n8n:5678 {
 			uri /webhook/{$WEBHOOK_ID}/check
 			copy_headers X-Forwarded-User
 		}
 	}
 
-	handle /login {
-		uri replace login webhook/{$WEBHOOK_ID}/login
+	handle /_auth/login {
+		uri replace /_auth/login webhook/{$WEBHOOK_ID}/login
 		reverse_proxy n8n:5678 {
 			header_up X-Real-IP {remote_host}
 		}
 	}
 
-	handle /logout {
-		uri replace logout webhook/{$WEBHOOK_ID}/logout
+	handle /_auth/logout {
+		uri replace /_auth/logout webhook/{$WEBHOOK_ID}/logout
 		reverse_proxy n8n:5678
 	}
 
-  reverse_proxy whoami:80
+  reverse_proxy grist:8484 {
+		header_up -X-Real-IP
+	}
 }

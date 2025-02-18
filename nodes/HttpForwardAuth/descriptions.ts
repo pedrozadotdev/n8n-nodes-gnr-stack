@@ -2,7 +2,7 @@
 import type { INodeTypeDescription } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 
-import { TRIGGER_NAME } from './constants';
+import { TRIGGER_NAME } from '../common/constants';
 import { loginPageHTMLTemplate } from './templates';
 
 export const responseDescription: INodeTypeDescription = {

@@ -8,17 +8,17 @@ import type {
 	INodeType,
 } from 'n8n-workflow';
 
-import { FORWARDED_USER_HEADER, TRIGGER_NAME } from './constants';
+import { FORWARDED_USER_HEADER, TRIGGER_NAME } from '../common/constants';
 import { responseDescription } from './descriptions';
-import { getRedisClient } from './transport';
-import type { RedisCredential } from './types';
+import { getRedisClient } from '../common/transport';
+import type { RedisCredential } from '../common/types';
 import {
 	createSession,
 	generateSessionToken,
 	rateLimitReset,
 	redisConnectionTest,
 	setSessionTokenCookie,
-} from './utils';
+} from '../common/utils';
 
 type TriggerParamsType = {
 	authURL: string;

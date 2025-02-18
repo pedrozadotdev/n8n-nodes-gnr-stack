@@ -1,4 +1,4 @@
-import { cookieParse } from '../../nodes/HttpForwardAuth/cookieParser';
+import { cookieParse } from '../../nodes/common/cookieParser';
 
 const cookies = [
 	'AAA-Aaaa-Aaaaaa=00-Aaa-0000; BBB-Bbbb-Bbbbbb-Bbbbbb=11-Bbb-1111; CCC-CC=222; DddDD=DD:DD:Ddd_Ddddddddd:33.33:-333.33:d3; EeeeeeeEeeeeEeeee=4.444',

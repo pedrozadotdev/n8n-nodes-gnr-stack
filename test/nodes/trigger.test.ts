@@ -6,7 +6,7 @@ import {
 	RATE_LIMIT_STORAGE_KEY,
 	REMOTE_IP_HEADER,
 	SESSION_KEY,
-} from '../../nodes/HttpForwardAuth/constants';
+} from '../../nodes/common/constants';
 
 jest.mock('redis', () => ({
 	__esModule: true,

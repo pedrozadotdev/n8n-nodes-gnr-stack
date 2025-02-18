@@ -4,14 +4,11 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - N8N_PATH=/n8n/
-      - WEBHOOK_URL=http://localhost:8080/n8n/
-      - N8N_PROXY_HOPS=1
     volumes:
       - ./data/n8n:/home/node/.n8n
       - ../dist:/home/node/.n8n/custom
     ports:
-      - 5678:5678
+      - 8081:5678
     depends_on:
       build:
         condition: service_completed_successfully
@@ -24,22 +21,52 @@ services:
     command: ["run", "build-docker"]
 
   redis:
-    image: redis:7-alpine
+    image: redis/redis-stack:latest
     restart: always
-    command: redis-server --save 20 1 --loglevel warning
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./data/redis:/data
+    ports:
+      - 8082:8001
 
-  whoami:
-    image: traefik/whoami
+  grist:
+    image: gristlabs/grist-oss
     restart: always
-
+    volumes:
+      - ./data/grist:/persist
+    environment:
+      - GRIST_SESSION_SECRET=invent-a-secret-here
+      - GRIST_DEFAULT_EMAIL=your-email@example.com
+      - GRIST_SANDBOX_FLAVOR=gvisor
+      - APP_HOME_URL=http://localhost:8080
+      - GRIST_SINGLE_ORG=example-com
+      - COOKIE_MAX_AGE=604800000
+      - GRIST_HIDE_UI_ELEMENTS=helpCenter,billing,templates,createSite,multiSite,multiAccounts,sendToDrive,tutorials,supportGrist
+      - GRIST_PAGE_TITLE_SUFFIX=" - Example.com"
+      - GRIST_WIDGET_LIST_URL="https://github.com/gristlabs/grist-widget/releases/download/latest/manifest.json"
+      - ALLOWED_WEBHOOK_DOMAINS=n8n:5678
+      - GRIST_FORWARD_AUTH_HEADER=X-Forwarded-User
+      - GRIST_FORWARD_AUTH_LOGOUT_PATH=/_auth/logout
+      # - GRIST_DOCS_MINIO_ACCESS_KEY=grist
+      # - GRIST_DOCS_MINIO_SECRET_KEY=grist
+      # - GRIST_DOCS_MINIO_ENDPOINT=s3
+      # - GRIST_DOCS_MINIO_PORT=8333
+      # - GRIST_DOCS_MINIO_USE_SSL=0
+      # - GRIST_DOCS_MINIO_BUCKET=grist
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
   caddy:
     image: caddy:alpine
     restart: always
     environment:
       - WEBHOOK_ID=aa1e42ef-7492-4235-9f22-e3c007358d15
     ports:
-      - 8080:80
+      - 8080:8080
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile

@@ -3,9 +3,9 @@ import {
 	encodeHexLowerCase,
 	encodeBase32LowerCaseNoPadding,
 	sha256,
-} from '../../nodes/HttpForwardAuth/oslojs';
-import { SHA256 } from '../../nodes/HttpForwardAuth/oslojs/sha2/sha256';
-import { bigEndian, rotr32 } from '../../nodes/HttpForwardAuth/oslojs/binary';
+} from '../../nodes/common/oslojs';
+import { SHA256 } from '../../nodes/common/oslojs/sha2/sha256';
+import { bigEndian, rotr32 } from '../../nodes/common/oslojs/binary';
 
 describe('Oslojs Suite', () => {
 	it('Should encode to HexLowerCase', () => {

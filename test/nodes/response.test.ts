@@ -1,6 +1,6 @@
 import { resetJest, resetRedis, setupResponse } from '../helpers';
 import { HttpForwardAuth } from '../../nodes/HttpForwardAuth/HttpForwardAuth.node';
-import { FORWARDED_USER_HEADER } from '../../nodes/HttpForwardAuth/constants';
+import { FORWARDED_USER_HEADER } from '../../nodes/common/constants';
 
 jest.mock('redis', () => ({
 	__esModule: true,

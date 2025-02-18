@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { SESSION_KEY, RATE_LIMIT_STORAGE_KEY } from '../nodes/HttpForwardAuth/constants';
+import { SESSION_KEY, RATE_LIMIT_STORAGE_KEY } from '../nodes/common/constants';
 import {
 	redisConnectionTest,
 	generateSessionToken,
@@ -10,9 +10,9 @@ import {
 	rateLimitReset,
 	setSessionTokenCookie,
 	deleteSessionTokenCookie
-} from '../nodes/HttpForwardAuth/utils';
+} from '../nodes/common/utils';
 import type { ICredentialTestFunctions } from 'n8n-workflow';
-import { getRedisClient } from '../nodes/HttpForwardAuth/transport';
+import { getRedisClient } from '../nodes/common/transport';
 import { credentialsMock, setupRedis, resetRedis, resetJest } from './helpers';
 
 jest.mock('redis', () => ({

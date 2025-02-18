@@ -40,7 +40,8 @@
     "n8nNodesApiVersion": 1,
     "nodes": [
       "dist/nodes/HttpForwardAuth/HttpForwardAuth.node.js",
-      "dist/nodes/HttpForwardAuth/HttpForwardAuthTrigger.node.js"
+      "dist/nodes/HttpForwardAuth/HttpForwardAuthTrigger.node.js",
+      "dist/nodes/VectorStoreRedis/VectorStoreRedis.node.js"
     ]
   },
   "devDependencies": {
@@ -62,6 +63,8 @@
     "n8n-workflow": "*"
   },
   "dependencies": {
+    "@langchain/redis": "^0.1.0",
+    "@n8n/n8n-nodes-langchain": "^0.3.0",
     "redis": "^4.7.0"
   }
 }
