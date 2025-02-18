@@ -62,7 +62,7 @@ describe('Response Suite', () => {
 			body: undefined,
 			headers: {
 				'Set-Cookie': expect.stringMatching(
-					/n8n_hfa_session=[A-Za-z0-9]{32}; HttpOnly; SameSite=Lax; Expires=Mon, \d{1,2} \w{3} \d{4} \d{2}:\d{2}:\d{2} GMT; Path=\/; Secure/g,
+					/n8n_hfa_session=[A-Za-z0-9]{32}; HttpOnly; SameSite=Lax; Expires=\w{3}, \d{2} \w{3} \d{4} \d{2}:\d{2}:\d{2} GMT; Path=\/; Secure/g,
 				),
 				location: 'http://localhost:8080/protected',
 			},

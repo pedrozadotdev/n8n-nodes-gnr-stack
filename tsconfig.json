@@ -21,9 +21,7 @@
 		"outDir": "./dist/",
 	},
 	"include": [
-		"credentials/**/*",
 		"nodes/**/*",
-		"test/**/*",
 		"nodes/**/*.json",
 		"package.json",
 	],

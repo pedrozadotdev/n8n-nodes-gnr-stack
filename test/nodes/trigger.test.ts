@@ -84,7 +84,7 @@ describe('Trigger Suite', () => {
 			webhookName: 'logout',
 			request: {
 				headers: {
-					Origin: 'http://localhost:8080',
+					origin: 'http://localhost:8080',
 				},
 			},
 		});
@@ -205,7 +205,7 @@ describe('Trigger Suite', () => {
 			webhookName: 'default',
 			request: {
 				headers: {
-					Origin: 'http://localhost:8080',
+					origin: 'http://localhost:8080',
 				},
 				body,
 			},
@@ -225,7 +225,7 @@ describe('Trigger Suite', () => {
 			webhookName: 'default',
 			request: {
 				headers: {
-					Origin: 'http://localhost:8080',
+					origin: 'http://localhost:8080',
 					[REMOTE_IP_HEADER]: 'REMOTE_IP',
 				},
 				body,
@@ -253,7 +253,7 @@ describe('Trigger Suite', () => {
 			webhookName: 'default',
 			request: {
 				headers: {
-					Origin: 'http://localhost:8080',
+					origin: 'http://localhost:8080',
 					[REMOTE_IP_HEADER]: 'REMOTE_IP',
 				},
 				body,

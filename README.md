@@ -1,3 +1,12 @@
+[![codecov](https://codecov.io/gh/pedrozadotdev/n8n-nodes-gnr-stack/branch/main/graph/badge.svg)](https://codecov.io/gh/pedrozadotdev/n8n-nodes-gnr-stack)
+![](https://github.com/pedrozadotdev/n8n-nodes-gnr-stack/workflows/Release%20CI/badge.svg)
+[![Version][npm-version]][npm-link] [![NPM Downloads][npm-downloads]][npm-link] [![License][npm-license]](https://github.com/pedrozadotdev/n8n-nodes-gnr-stack/blob/main/LICENSE)
+
+[npm-version]: https://img.shields.io/npm/v/n8n-nodes-gnr-stack.svg
+[npm-downloads]: https://img.shields.io/npm/dt/n8n-nodes-gnr-stack.svg
+[npm-license]: https://img.shields.io/npm/l/n8n-nodes-gnr-stack.svg
+[npm-link]: https://www.npmjs.com/package/n8n-nodes-gnr-stack
+
 # n8n-nodes-gnr-stack
 
 This is a set of n8n community nodes. It may be used in GNR(Grist/N8n/Redis) Stack.
@@ -47,5 +56,6 @@ N8N 1.76.1 and above.
 ## Resources
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
+* [A Better Way to Store Passwords](https://auth0.com/blog/adding-salt-to-hashing-a-better-way-to-store-passwords/)
 * [Caddy Forward Auth](https://caddyserver.com/docs/caddyfile/directives/forward_auth)
 * [RedisVectorStore](https://js.langchain.com/docs/integrations/vectorstores/redis/)

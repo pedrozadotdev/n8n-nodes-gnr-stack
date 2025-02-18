@@ -1,6 +1,6 @@
 :8080 {
 
-	handle_path /n8n/webhook/* {
+	handle /n8n/webhook/* {
 		uri strip_prefix /n8n
     reverse_proxy n8n:5678 {
 			header_up X-Real-IP {remote_host}

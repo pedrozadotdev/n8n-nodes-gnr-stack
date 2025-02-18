@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-http-gnr-stack",
+  "name": "n8n-nodes-gnr-stack",
   "version": "0.1.0",
   "description": "This is a set of n8n community nodes. It may be used in GNR Stack.",
   "keywords": [
@@ -26,12 +26,13 @@
     "build": "tsc && gulp build:icons",
     "build-docker": "pnpm i && pnpm build && chown -R node:node ./dist",
     "dev": "tsc --watch",
-    "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials package.json",
-    "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json",
-    "test": "jest --silent=false",
-    "test-watch": "jest --watch"
+    "format": "prettier nodes --write",
+    "lint": "eslint nodes package.json",
+    "lintfix": "eslint nodes package.json --fix",
+    "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes package.json",
+    "test": "jest",
+    "coverage": "jest --collectCoverage=true",
+    "ci": "pnpm test && pnpm build"
   },
   "files": [
     "dist"
